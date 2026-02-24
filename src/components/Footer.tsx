@@ -6,12 +6,10 @@ const Footer = () => {
       <div className="container-narrow py-16">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
           {/* Brand */}
-          <div>
+            <div>
             <div className="flex items-center gap-2 mb-4">
-              <span className="text-2xl">🌍</span>
-              <span className="font-heading text-xl font-bold">
-                Prayer <span className="gold-gradient-text">Realm</span>
-              </span>
+              <img src="/LOGO 2.png" alt="Prayer Realm" className="h-auto w-auto" />
+              
             </div>
             <p className="text-primary-foreground/60 text-sm leading-relaxed">
               Raising Global Altars of Prayer. Connecting nations through the power of prayer.

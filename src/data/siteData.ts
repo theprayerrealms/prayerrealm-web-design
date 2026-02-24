@@ -21,19 +21,19 @@ export const impactStats = [
 export const events = [
   {
     id: 1,
-    title: "Global Night of Prayer",
-    date: "March 15, 2026",
+    title: "Wrestle Lagos",
+    date: "March 27, 2026",
     time: "7:00 PM EST",
     description: "Join believers from over 30 nations for an all-night prayer vigil streaming live worldwide.",
-    location: "Online / Global",
+    location: "lagos, Nigeria & Online",
   },
   {
     id: 2,
-    title: "Healing & Restoration Service",
+    title: "Wrestle Nyc",
     date: "March 22, 2026",
     time: "10:00 AM GMT",
     description: "A powerful service focused on healing prayers and spiritual restoration for the body, mind, and soul.",
-    location: "Online / Global",
+    location: "New York, USA & Online",
   },
   {
     id: 3,
