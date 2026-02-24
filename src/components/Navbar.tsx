@@ -12,10 +12,11 @@ const Navbar = () => {
     <nav className="fixed top-0 left-0 right-0 z-50 gradient-navy border-b border-navy-light/30">
       <div className="container-narrow flex items-center justify-between h-16 md:h-20">
         <Link to="/" className="flex items-center gap-2">
-          <span className="text-2xl">🌍</span>
-          <span className="font-heading text-xl font-bold text-primary-foreground tracking-wide">
-            Prayer <span className="gold-gradient-text">Realm</span>
-          </span>
+            <img 
+            src="/LOGO 2.png" 
+            alt="Prayer Realm" 
+            className="h-8 w-auto"
+            />
         </Link>
 
         {/* Desktop Nav */}

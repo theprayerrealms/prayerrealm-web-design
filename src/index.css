@@ -6,76 +6,76 @@
 
 @layer base {
   :root {
-    --background: 210 20% 98%;
-    --foreground: 210 60% 11%;
+    --background: 0 0% 100%; /* white */
+    --foreground: 0 0% 0%; /* black */
 
-    --card: 0 0% 100%;
-    --card-foreground: 210 60% 11%;
+    --card: 0 0% 100%; /* white */
+    --card-foreground: 0 0% 0%; /* black */
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 210 60% 11%;
+    --popover: 0 0% 100%; /* white */
+    --popover-foreground: 0 0% 0%; /* black */
 
-    --primary: 210 60% 11%;
-    --primary-foreground: 43 30% 95%;
+    --primary: 0 100% 50%; /* red */
+    --primary-foreground: 0 0% 100%; /* white */
 
-    --secondary: 210 15% 93%;
-    --secondary-foreground: 210 60% 11%;
+    --secondary: 60 100% 50%; /* yellow */
+    --secondary-foreground: 0 0% 0%; /* black */
 
-    --muted: 210 15% 93%;
-    --muted-foreground: 210 10% 45%;
+    --muted: 0 0% 95%; /* light gray */
+    --muted-foreground: 0 0% 40%; /* dark gray */
 
-    --accent: 43 65% 52%;
-    --accent-foreground: 210 60% 6%;
+    --accent: 60 100% 50%; /* yellow */
+    --accent-foreground: 0 0% 0%; /* black */
 
-    --destructive: 0 84% 60%;
-    --destructive-foreground: 0 0% 100%;
+    --destructive: 0 100% 50%; /* red */
+    --destructive-foreground: 0 0% 100%; /* white */
 
-    --border: 210 20% 88%;
-    --input: 210 20% 88%;
-    --ring: 43 65% 52%;
+    --border: 0 0% 90%; /* light gray */
+    --input: 0 0% 90%; /* light gray */
+    --ring: 0 100% 50%; /* red */
 
     --radius: 0.5rem;
 
-    --gold: 43 65% 52%;
-    --gold-light: 43 70% 70%;
-    --gold-dark: 43 60% 40%;
-    --navy: 210 60% 11%;
-    --navy-light: 210 40% 20%;
-    --navy-dark: 210 70% 6%;
+    --gold: 60 100% 50%; /* yellow */
+    --gold-light: 60 100% 70%;
+    --gold-dark: 60 100% 40%;
+    --navy: 0 0% 0%; /* black */
+    --navy-light: 0 0% 20%;
+    --navy-dark: 0 0% 0%;
 
-    --sidebar-background: 210 60% 11%;
-    --sidebar-foreground: 210 15% 93%;
-    --sidebar-primary: 43 65% 52%;
-    --sidebar-primary-foreground: 210 60% 6%;
-    --sidebar-accent: 210 40% 20%;
-    --sidebar-accent-foreground: 210 15% 93%;
-    --sidebar-border: 210 40% 20%;
-    --sidebar-ring: 43 65% 52%;
+    --sidebar-background: 0 0% 0%; /* black */
+    --sidebar-foreground: 0 0% 100%; /* white */
+    --sidebar-primary: 0 100% 50%; /* red */
+    --sidebar-primary-foreground: 0 0% 0%; /* black */
+    --sidebar-accent: 0 0% 20%; /* dark gray */
+    --sidebar-accent-foreground: 0 0% 100%; /* white */
+    --sidebar-border: 0 0% 20%; /* dark gray */
+    --sidebar-ring: 0 100% 50%; /* red */
 
     --font-heading: 'Playfair Display', Georgia, serif;
     --font-body: 'DM Sans', system-ui, sans-serif;
   }
 
   .dark {
-    --background: 210 60% 6%;
-    --foreground: 210 15% 93%;
-    --card: 210 60% 11%;
-    --card-foreground: 210 15% 93%;
-    --popover: 210 60% 11%;
-    --popover-foreground: 210 15% 93%;
-    --primary: 43 65% 52%;
-    --primary-foreground: 210 60% 6%;
-    --secondary: 210 40% 20%;
-    --secondary-foreground: 210 15% 93%;
-    --muted: 210 40% 20%;
-    --muted-foreground: 210 15% 60%;
-    --accent: 43 65% 52%;
-    --accent-foreground: 210 60% 6%;
-    --destructive: 0 62% 30%;
-    --destructive-foreground: 0 0% 100%;
-    --border: 210 40% 20%;
-    --input: 210 40% 20%;
-    --ring: 43 65% 52%;
+    --background: 0 0% 0%; /* black */
+    --foreground: 0 0% 100%; /* white */
+    --card: 0 0% 10%; /* dark gray */
+    --card-foreground: 0 0% 100%; /* white */
+    --popover: 0 0% 10%; /* dark gray */
+    --popover-foreground: 0 0% 100%; /* white */
+    --primary: 0 100% 50%; /* red */
+    --primary-foreground: 0 0% 0%; /* black */
+    --secondary: 60 100% 50%; /* yellow */
+    --secondary-foreground: 0 0% 0%; /* black */
+    --muted: 0 0% 20%; /* dark gray */
+    --muted-foreground: 0 0% 70%; /* light gray */
+    --accent: 60 100% 50%; /* yellow */
+    --accent-foreground: 0 0% 0%; /* black */
+    --destructive: 0 100% 50%; /* red */
+    --destructive-foreground: 0 0% 100%; /* white */
+    --border: 0 0% 20%; /* dark gray */
+    --input: 0 0% 20%; /* dark gray */
+    --ring: 0 100% 50%; /* red */
   }
 }
 
@@ -108,23 +108,23 @@
   }
 
   .gradient-navy {
-    background: linear-gradient(135deg, hsl(210 60% 11%), hsl(210 70% 6%));
+    background: linear-gradient(135deg, hsl(0 0% 0%), hsl(0 0% 10%));
   }
 
   .gradient-navy-overlay {
     background: linear-gradient(
       180deg,
-      hsl(210 60% 11% / 0.85) 0%,
-      hsl(210 70% 6% / 0.7) 100%
+      hsl(0 0% 0% / 0.85) 0%,
+      hsl(0 0% 10% / 0.7) 100%
     );
   }
 
   .gold-text {
-    color: hsl(43 65% 52%);
+    color: hsl(60 100% 50%);
   }
 
   .gold-gradient-text {
-    background: linear-gradient(135deg, hsl(43 70% 70%), hsl(43 65% 52%), hsl(43 60% 40%));
+    background: linear-gradient(135deg, hsl(60 100% 70%), hsl(60 100% 50%), hsl(60 100% 40%));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -132,30 +132,30 @@
 
   .card-elevated {
     @apply bg-card rounded-lg border border-border shadow-sm;
-    box-shadow: 0 4px 20px -4px hsl(210 60% 11% / 0.08);
+    box-shadow: 0 4px 20px -4px hsl(0 0% 0% / 0.08);
   }
 
   .btn-gold {
     @apply inline-flex items-center justify-center rounded-md px-6 py-3 font-medium transition-all duration-300;
-    background: linear-gradient(135deg, hsl(43 65% 52%), hsl(43 60% 40%));
-    color: hsl(210 60% 6%);
+    background: linear-gradient(135deg, hsl(0 100% 50%), hsl(0 100% 40%));
+    color: hsl(0 0% 100%);
   }
 
   .btn-gold:hover {
-    background: linear-gradient(135deg, hsl(43 70% 58%), hsl(43 65% 45%));
+    background: linear-gradient(135deg, hsl(0 100% 60%), hsl(0 100% 50%));
     transform: translateY(-1px);
-    box-shadow: 0 4px 16px hsl(43 65% 52% / 0.4);
+    box-shadow: 0 4px 16px hsl(0 100% 50% / 0.4);
   }
 
   .btn-outline-light {
     @apply inline-flex items-center justify-center rounded-md px-6 py-3 font-medium transition-all duration-300;
-    border: 1.5px solid hsl(43 30% 95% / 0.6);
-    color: hsl(43 30% 95%);
+    border: 1.5px solid hsl(0 0% 100% / 0.6);
+    color: hsl(0 0% 100%);
   }
 
   .btn-outline-light:hover {
-    background: hsl(43 30% 95% / 0.1);
-    border-color: hsl(43 65% 52%);
-    color: hsl(43 65% 52%);
+    background: hsl(0 0% 100% / 0.1);
+    border-color: hsl(60 100% 50%);
+    color: hsl(60 100% 50%);
   }
 }
