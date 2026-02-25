@@ -62,15 +62,15 @@ const Index = () => {
       <SectionWrapper>
         <div className="text-center max-w-3xl mx-auto">
           <h2 className="font-heading text-3xl md:text-4xl font-bold mb-6">
-            Our <span className="gold-text">Mission</span>
+            Our <span className="text-black">Mission</span>
           </h2>
           <p className="text-muted-foreground text-lg leading-relaxed">
-            Prayer Realm is an international, non-denominational prayer ministry dedicated to raising up prayer warriors 
-            across the globe. We believe that when believers unite in prayer, heaven responds. Our mission is to provide 
-            a platform where people from every nation can request prayer, intercede for others, and experience the 
+            Prayer Realm is an international, non-denominational prayer ministry dedicated to raising up prayer warriors
+            across the globe. We believe that when believers unite in prayer, heaven responds. Our mission is to provide
+            a platform where people from every nation can request prayer, intercede for others, and experience the
             transformative power of communal prayer.
           </p>
-          <Link to="/about" className="inline-flex items-center gap-2 gold-text font-medium mt-6 hover:gap-3 transition-all">
+          <Link to="/about" className="inline-flex items-center gap-2 text-red-600 font-medium mt-6 hover:gap-3 transition-all">
             Learn more about us <ArrowRight size={18} />
           </Link>
         </div>
@@ -92,9 +92,9 @@ const Index = () => {
       <SectionWrapper>
         <div className="flex items-center justify-between mb-10">
           <h2 className="font-heading text-3xl md:text-4xl font-bold">
-            Upcoming <span className="gold-text">Events</span>
+            Upcoming <span className="text-black">Events</span>
           </h2>
-          <Link to="/events" className="hidden sm:inline-flex items-center gap-2 gold-text font-medium hover:gap-3 transition-all">
+          <Link to="/events" className="hidden sm:inline-flex items-center gap-2 text-red-600 font-medium hover:gap-3 transition-all">
             View all <ArrowRight size={18} />
           </Link>
         </div>
@@ -105,7 +105,7 @@ const Index = () => {
               whileHover={{ y: -4 }}
               className="card-elevated p-6"
             >
-              <div className="flex items-center gap-2 gold-text text-sm font-medium mb-3">
+              <div className="flex items-center gap-2 text-red-600 text-sm font-medium mb-3">
                 <Calendar size={16} />
                 {event.date}
               </div>
@@ -123,7 +123,7 @@ const Index = () => {
       {/* Testimonies Preview */}
       <SectionWrapper className="bg-secondary">
         <h2 className="font-heading text-3xl md:text-4xl font-bold text-center mb-10">
-          What God is <span className="gold-text">Doing</span>
+          What God is <span className="text-black">Doing</span>
         </h2>
         <div className="grid md:grid-cols-3 gap-6">
           {testimonies.slice(0, 3).map((t) => (
@@ -151,7 +151,7 @@ const Index = () => {
             Praying Across the <span className="gold-gradient-text">Globe</span>
           </h2>
           <p className="text-primary-foreground/60 max-w-2xl mx-auto mb-8">
-            Our prayer network spans over 54 nations, with intercessors standing in the gap for every continent. 
+            Our prayer network spans over 54 nations, with intercessors standing in the gap for every continent.
             From Asia to Africa, Europe to the Americas — the altar of prayer is being raised.
           </p>
           <div className="text-6xl md:text-8xl opacity-30">🌍</div>
