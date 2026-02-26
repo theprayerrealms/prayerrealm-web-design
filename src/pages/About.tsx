@@ -37,7 +37,7 @@ const About = () => {
       <SectionWrapper className="bg-muted/30">
         <div className="text-center mb-12">
           <h2 className="font-heading text-3xl md:text-4xl font-bold mb-4">
-            Our <span className="gold-text">Leadership</span> Team
+            Our <span className="red-text">Leadership</span> Team
           </h2>
           <p className="text-muted-foreground max-w-2xl mx-auto">
             Meet the dedicated individuals who lead our global mission to connect believers in prayer.
@@ -45,12 +45,12 @@ const About = () => {
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
           {[
-            { name: "Rev. Dr. Samuel", role: "Founder", image: "/images/team/founder.png" },
-            { name: "Sarah Johnson", role: "Media Director (Global)", image: "/images/team/media-director.png" },
-            { name: "Nathan Cross", role: "Global Music Director", image: "/images/team/music-director.png" },
-            { name: "David Chen", role: "Admin (Global)", image: "/images/team/admin.png" },
-            { name: "Grace Wilson", role: "Tech (Global)", image: "/images/team/tech.png" },
-            { name: "Pastor Emmanuel", role: "Prayer Global", image: "/images/team/prayer.png" },
+            { name: "Prophet Akintunde Hezekiah", role: "Founder", image: "/images/team/founder.png" },
+            { name: "Pastor Craig Femi", role: "Admin (Global)", image: "/images/team/media-director.png" },
+            { name: "Minister B", role: "Global Music Director", image: "/images/team/music-director.png" },
+            { name: "Pastor Sanmi Ayotunde", role: "Media & Tech Director (Global)", image: "/images/team/admin.png" },
+            { name: "Grace Wilson", role: "Prayer Director (Global)", image: "/images/team/tech.png" },
+            { name: "Pastor Emmanuel", role: "Project Director (Global)", image: "/images/team/prayer.png" },
           ].map((member, index) => (
             <div
               key={index}
@@ -65,7 +65,7 @@ const About = () => {
               </div>
               <div className="p-6 text-center">
                 <h3 className="font-heading text-xl font-bold mb-1">{member.name}</h3>
-                <p className="gold-text font-medium text-sm">{member.role}</p>
+                <p className="text-primary font-medium text-sm">{member.role}</p>
               </div>
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100 flex flex-col justify-end p-6">
                 <p className="text-white text-sm font-medium">{member.role}</p>
