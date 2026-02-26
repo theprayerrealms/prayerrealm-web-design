@@ -22,15 +22,57 @@ const About = () => {
             Who We <span className="gold-text">Are</span>
           </h2>
           <p className="text-muted-foreground text-lg leading-relaxed mb-4">
-            Prayer Realm is an international, non-denominational prayer ministry with a singular mission: 
-            to raise global altars of prayer. Founded on the belief that prayer is the most powerful force 
-            available to humanity, we connect believers from every nation to pray, intercede, and seek 
+            Prayer Realm is an international, non-denominational prayer ministry with a singular mission:
+            to raise global altars of prayer. Founded on the belief that prayer is the most powerful force
+            available to humanity, we connect believers from every nation to pray, intercede, and seek
             God's face together.
           </p>
           <p className="text-muted-foreground text-lg leading-relaxed">
-            Our team of dedicated intercessors, pastors, and volunteers work around the clock to ensure 
+            Our team of dedicated intercessors, pastors, and volunteers work around the clock to ensure
             that no prayer goes unheard. We believe that when the church prays, heaven moves.
           </p>
+        </div>
+      </SectionWrapper>
+
+      <SectionWrapper className="bg-muted/30">
+        <div className="text-center mb-12">
+          <h2 className="font-heading text-3xl md:text-4xl font-bold mb-4">
+            Our <span className="gold-text">Leadership</span> Team
+          </h2>
+          <p className="text-muted-foreground max-w-2xl mx-auto">
+            Meet the dedicated individuals who lead our global mission to connect believers in prayer.
+          </p>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+          {[
+            { name: "Rev. Dr. Samuel", role: "Founder", image: "/images/team/founder.png" },
+            { name: "Sarah Johnson", role: "Media Director (Global)", image: "/images/team/media-director.png" },
+            { name: "Nathan Cross", role: "Global Music Director", image: "/images/team/music-director.png" },
+            { name: "David Chen", role: "Admin (Global)", image: "/images/team/admin.png" },
+            { name: "Grace Wilson", role: "Tech (Global)", image: "/images/team/tech.png" },
+            { name: "Pastor Emmanuel", role: "Prayer Global", image: "/images/team/prayer.png" },
+          ].map((member, index) => (
+            <div
+              key={index}
+              className="group relative overflow-hidden rounded-2xl bg-card shadow-lg transition-all hover:-translate-y-2 hover:shadow-xl"
+            >
+              <div className="aspect-[4/5] overflow-hidden">
+                <img
+                  src={member.image}
+                  alt={member.name}
+                  className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
+                />
+              </div>
+              <div className="p-6 text-center">
+                <h3 className="font-heading text-xl font-bold mb-1">{member.name}</h3>
+                <p className="gold-text font-medium text-sm">{member.role}</p>
+              </div>
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100 flex flex-col justify-end p-6">
+                <p className="text-white text-sm font-medium">{member.role}</p>
+                <p className="text-white/80 text-xs mt-1">Leading with passion and faith.</p>
+              </div>
+            </div>
+          ))}
         </div>
       </SectionWrapper>
 
