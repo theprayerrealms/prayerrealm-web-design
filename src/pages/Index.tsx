@@ -10,60 +10,51 @@ const Index = () => {
   return (
     <>
       {/* Hero */}
-      <section className="relative min-h-[95vh] flex items-center justify-center overflow-hidden mesh-gradient pt-20">
-        {/* Dynamic Design Elements */}
-        <div className="blur-orb w-[500px] h-[500px] bg-red-600 -top-40 -left-20" />
-        <div className="blur-orb w-[600px] h-[600px] bg-accent -bottom-40 rotate-180 right-0 opacity-20" />
-        <div className="blur-orb w-[300px] h-[300px] bg-blue-600 top-20 right-20 opacity-10" />
-
-        <img src={heroBg} alt="Global prayer gathering" className="absolute inset-0 w-full h-full object-cover opacity-50 mix-blend-overlay scale-105" />
-        <div className="gradient-navy-overlay absolute inset-0 opacity-80" />
-
-        <div className="relative z-10 text-center px-4 max-w-5xl mx-auto">
-          <div className="glass-card rounded-[40px] p-8 md:p-16 border-white/10 shadow-2xl backdrop-blur-xl">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
-              className="inline-block px-4 py-1.5 rounded-full bg-white/5 border border-white/10 mb-6"
-            >
-              <p className="gold-text font-bold tracking-[0.2em] uppercase text-xs">
-                Raising Global Altars of Prayer
-              </p>
-            </motion.div>
-
-            <motion.h1
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.7, delay: 0.15 }}
-              className="font-heading text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold text-white leading-[1.1] mb-8"
-            >
-              Connecting Nations through <span className="gold-gradient-text">Prayer</span>
-            </motion.h1>
-
-            <motion.p
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.3 }}
-              className="text-white/70 text-lg md:text-2xl mb-12 max-w-3xl mx-auto font-medium leading-relaxed"
-            >
-              Join thousands of believers worldwide in fervent prayer. Together, we are building spiritual altars that shift atmospheres and transform nations.
-            </motion.p>
-
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.45 }}
-              className="flex flex-wrap justify-center gap-6"
-            >
-              <Link to="/prayer-wall" className="btn-gold text-lg px-10 py-4 shadow-xl shadow-red-600/20">
-                Submit Prayer Request
-              </Link>
-              <Link to="/events" className="btn-outline-light text-lg px-10 py-4 backdrop-blur-sm">
-                Join Live Prayer
-              </Link>
-            </motion.div>
-          </div>
+      <section className="relative min-h-[90vh] flex items-center justify-center overflow-hidden">
+        <img src={heroBg} alt="Global prayer gathering" className="absolute inset-0 w-full h-full object-cover" />
+        <div className="gradient-navy-overlay absolute inset-0" />
+        <div className="relative z-10 text-center px-4 max-w-4xl mx-auto">
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            className="gold-text font-medium tracking-widest uppercase text-sm mb-4"
+          >
+            Raising Global Altars of Prayer
+          </motion.p>
+          <motion.h1
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, delay: 0.15 }}
+            className="font-heading text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-white leading-tight mb-6"
+          >
+            Connecting Nations Through the{" "}
+            <span className="gold-gradient-text">Power of Prayer</span>
+          </motion.h1>
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.3 }}
+            className="text-white/70 text-lg md:text-xl mb-10 max-w-2xl mx-auto"
+          >
+            Join thousands of believers worldwide in fervent prayer. Together, we are building spiritual altars that shift atmospheres and transform nations.
+          </motion.p>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.45 }}
+            className="flex flex-wrap justify-center gap-4"
+          >
+            <Link to="/prayer-wall" className="btn-gold text-base">
+              Submit Prayer Request
+            </Link>
+            <Link to="/events" className="btn-outline-light text-base">
+              Join Live Prayer
+            </Link>
+            <Link to="/give" className="btn-outline-light text-base">
+              Give Now
+            </Link>
+          </motion.div>
         </div>
       </section>
 
