@@ -39,7 +39,7 @@ export const events = [
   },
   {
     id: 3,
-    title: "Youth Prayer Conference",
+    title: "Wrestle Ghana",
     date: "April 5, 2026",
     time: "3:00 PM WAT",
     description: "Empowering the next generation to build altars of prayer. This conference features dynamic workshops, youth-led prayer sessions, and inspiring messages to ignite a passion for Christ in your community.",
