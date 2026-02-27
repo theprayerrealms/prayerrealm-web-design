@@ -1,8 +1,7 @@
 export const navLinks = [
   { label: "Home", path: "/" },
   { label: "About", path: "/about" },
-  { label: "Prayer Request", path: "/prayer-request" },
-  { label: "Prayer Wall", path: "/prayer-wall" },
+  { label: "Prayers", path: "/prayer-wall" },
   { label: "Events", path: "/events" },
   { label: "Sermons", path: "/sermons" },
   { label: "Testimonies", path: "/testimonies" },

@@ -213,6 +213,22 @@
   .gold-spinner {
     @apply w-10 h-10 border-4 border-accent/20 border-t-accent rounded-full animate-spin;
   }
+
+  .glass-card {
+    @apply bg-white/10 backdrop-blur-md border border-white/20 shadow-xl;
+  }
+
+  .blur-orb {
+    @apply absolute rounded-full mix-blend-screen filter blur-[80px] opacity-30 animate-pulse;
+  }
+}
+
+.mesh-gradient {
+  background-color: #000;
+  background-image:
+    radial-gradient(at 0% 0%, hsla(0, 100%, 50%, 0.15) 0, transparent 50%),
+    radial-gradient(at 50% 0%, hsla(60, 100%, 50%, 0.1) 0, transparent 50%),
+    radial-gradient(at 100% 0%, hsla(240, 100%, 50%, 0.15) 0, transparent 50%);
 }
 
 @keyframes spin {

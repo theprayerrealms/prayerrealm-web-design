@@ -28,7 +28,7 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/about" element={<About />} />
-            <Route path="/prayer-request" element={<PrayerRequest />} />
+            <Route path="/prayer-request" element={<PrayerWall />} />
             <Route path="/events" element={<Events />} />
             <Route path="/sermons" element={<Sermons />} />
             <Route path="/volunteer" element={<Volunteer />} />
