@@ -111,40 +111,40 @@ const Give = () => {
             </div>
 
             <form onSubmit={(e) => e.preventDefault()}>
-              {/* Donor Info */}
-              <div className="grid grid-cols-1 gap-4 mb-6">
+              {/* Donor Info & Settings */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-4 mb-6">
                 <div>
-                  <label className="block text-sm font-medium mb-1.5">Full Name <span className="text-red-500">*</span></label>
+                  <label className="block text-sm font-medium mb-1 text-muted-foreground/80">Full Name <span className="text-red-500">*</span></label>
                   <input
                     type="text"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     placeholder="Enter your name"
-                    className="w-full bg-secondary border border-border rounded-md px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-accent"
+                    className="w-full bg-secondary border border-border rounded-md px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent transition-all"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-1.5">Email Address <span className="text-red-500">*</span></label>
+                  <label className="block text-sm font-medium mb-1 text-muted-foreground/80">Email Address <span className="text-red-500">*</span></label>
                   <input
                     type="email"
                     required
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="example@email.com"
-                    className="w-full bg-secondary border border-border rounded-md px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-accent"
+                    className="w-full bg-secondary border border-border rounded-md px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent transition-all"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-1.5">Phone Number <span className="text-red-500">*</span></label>
+                  <label className="block text-sm font-medium mb-1 text-muted-foreground/80">Phone Number <span className="text-red-500">*</span></label>
                   <div className="flex gap-2">
                     <select
                       value={countryCode}
                       onChange={(e) => setCountryCode(e.target.value)}
-                      className="w-24 bg-secondary border border-border rounded-md px-2 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-accent"
+                      className="w-20 bg-secondary border border-border rounded-md px-2 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-accent"
                     >
                       {countryCodes.map((c) => (
                         <option key={c.code} value={c.code}>
-                          {c.code} ({c.country})
+                          {c.code}
                         </option>
                       ))}
                     </select>
@@ -153,23 +153,21 @@ const Give = () => {
                       required
                       value={phone}
                       onChange={(e) => setPhone(e.target.value)}
-                      placeholder="000 000 0000"
-                      className="flex-1 bg-secondary border border-border rounded-md px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-accent"
+                      placeholder="Number"
+                      className="flex-1 bg-secondary border border-border rounded-md px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent"
                     />
                   </div>
                 </div>
-              </div>
-
-              {/* Currency */}
-              <div className="mb-6">
-                <label className="block text-sm font-medium mb-1.5">Currency <span className="text-red-500">*</span></label>
-                <select
-                  value={currency}
-                  onChange={(e) => setCurrency(e.target.value)}
-                  className="w-full bg-secondary border border-border rounded-md px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-accent"
-                >
-                  {currencies.map((c) => <option key={c} value={c}>{c}</option>)}
-                </select>
+                <div>
+                  <label className="block text-sm font-medium mb-1 text-muted-foreground/80">Currency <span className="text-red-500">*</span></label>
+                  <select
+                    value={currency}
+                    onChange={(e) => setCurrency(e.target.value)}
+                    className="w-full bg-secondary border border-border rounded-md px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent"
+                  >
+                    {currencies.map((c) => <option key={c} value={c}>{c}</option>)}
+                  </select>
+                </div>
               </div>
 
               {/* Amount Grid */}
