@@ -42,23 +42,25 @@ const Give = () => {
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [paymentStep, setPaymentStep] = useState<"select" | "processing">("select");
   const [selectedProvider, setSelectedProvider] = useState<"paystack" | "paypal" | null>(null);
+  const [error, setError] = useState("");
   const [submitted, setSubmitted] = useState(false);
 
   const finalAmount = selected ?? (custom ? Number(custom) : 0);
 
   const handleGive = (e: React.FormEvent) => {
     e.preventDefault();
-    alert("Button Clicked!");
-    if (!finalAmount || !email || !phone) {
-      alert("Please fill all fields: Amount, Email, and Phone.");
+    setError("");
+
+    if (!finalAmount || !email || !phone || !name) {
+      setError("Please complete all required fields before proceeding.");
       return;
     }
+
     setShowPaymentModal(true);
     setPaymentStep("select");
   };
 
   const processPayment = (provider: "paystack" | "paypal") => {
-    alert("Processing with " + provider);
     setSelectedProvider(provider);
     setPaymentStep("processing");
     setLoading(true);
@@ -108,11 +110,11 @@ const Give = () => {
               </p>
             </div>
 
-            <form onSubmit={handleGive}>
+            <form onSubmit={(e) => e.preventDefault()}>
               {/* Donor Info */}
               <div className="grid grid-cols-1 gap-4 mb-6">
                 <div>
-                  <label className="block text-sm font-medium mb-1.5">Full Name</label>
+                  <label className="block text-sm font-medium mb-1.5">Full Name <span className="text-red-500">*</span></label>
                   <input
                     type="text"
                     value={name}
@@ -122,7 +124,7 @@ const Give = () => {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-1.5">Email Address</label>
+                  <label className="block text-sm font-medium mb-1.5">Email Address <span className="text-red-500">*</span></label>
                   <input
                     type="email"
                     required
@@ -133,7 +135,7 @@ const Give = () => {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-1.5">Phone Number</label>
+                  <label className="block text-sm font-medium mb-1.5">Phone Number <span className="text-red-500">*</span></label>
                   <div className="flex gap-2">
                     <select
                       value={countryCode}
@@ -160,7 +162,7 @@ const Give = () => {
 
               {/* Currency */}
               <div className="mb-6">
-                <label className="block text-sm font-medium mb-1.5">Currency</label>
+                <label className="block text-sm font-medium mb-1.5">Currency <span className="text-red-500">*</span></label>
                 <select
                   value={currency}
                   onChange={(e) => setCurrency(e.target.value)}
@@ -171,31 +173,34 @@ const Give = () => {
               </div>
 
               {/* Amount Grid */}
-              <div className="grid grid-cols-3 gap-3 mb-4">
-                {amounts.map((amt) => (
-                  <button
-                    type="button"
-                    key={amt}
-                    onClick={() => { setSelected(amt); setCustom(""); }}
-                    className={`py-3 rounded-md text-sm font-semibold transition-all border ${selected === amt
-                      ? "btn-gold border-transparent"
-                      : "border-border hover:border-accent text-foreground"
-                      }`}
-                  >
-                    {currency} {amt}
-                  </button>
-                ))}
-              </div>
+              <div className="mb-4">
+                <label className="block text-sm font-medium mb-3">Select Amount <span className="text-red-500">*</span></label>
+                <div className="grid grid-cols-3 gap-3">
+                  {amounts.map((amt) => (
+                    <button
+                      type="button"
+                      key={amt}
+                      onClick={() => { setSelected(amt); setCustom(""); }}
+                      className={`py-3 rounded-md text-sm font-semibold transition-all border ${selected === amt
+                        ? "btn-gold border-transparent"
+                        : "border-border hover:border-accent text-foreground"
+                        }`}
+                    >
+                      {currency} {amt}
+                    </button>
+                  ))}
+                </div>
 
-              {/* Custom */}
-              <div className="mb-6">
-                <input
-                  type="number"
-                  value={custom}
-                  onChange={(e) => { setCustom(e.target.value); setSelected(null); }}
-                  placeholder="Custom amount"
-                  className="w-full bg-secondary border border-border rounded-md px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-accent"
-                />
+                {/* Custom */}
+                <div className="mt-4">
+                  <input
+                    type="number"
+                    value={custom}
+                    onChange={(e) => { setCustom(e.target.value); setSelected(null); }}
+                    placeholder="Custom amount"
+                    className="w-full bg-secondary border border-border rounded-md px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-accent"
+                  />
+                </div>
               </div>
 
               {/* Recurring */}
@@ -211,22 +216,30 @@ const Give = () => {
               </label>
 
               <button
-                type="submit"
+                type="button"
+                onClick={handleGive}
                 className="btn-gold w-full py-3 text-base"
+                disabled={loading}
               >
                 {loading ? "Processing..." : (finalAmount ? `Give ${currency} ${finalAmount}${recurring ? "/month" : ""}` : "Select an Amount")}
               </button>
+
+              {error && (
+                <p className="text-red-500 text-xs text-center mt-3 animate-pulse font-medium">
+                  {error}
+                </p>
+              )}
             </form>
 
             <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground mt-4">
               <Shield size={14} /> Secure payment processing
             </div>
           </div>
-        </div>
-      </SectionWrapper>
+        </div >
+      </SectionWrapper >
 
       {/* Payment Selection Modal */}
-      <Dialog open={showPaymentModal} onOpenChange={setShowPaymentModal}>
+      < Dialog open={showPaymentModal} onOpenChange={setShowPaymentModal} >
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle className="text-center font-heading text-xl">Complete Your Donation</DialogTitle>
@@ -281,7 +294,7 @@ const Give = () => {
             </div>
           )}
         </DialogContent>
-      </Dialog>
+      </Dialog >
     </>
   );
 };
