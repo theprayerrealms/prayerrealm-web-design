@@ -63,12 +63,22 @@ const Events = () => {
                 </p>
 
                 <div className="flex flex-wrap gap-4 mt-auto">
-                  <button className="btn-gold px-8 py-4 text-base font-bold">
+                  <a
+                    href={`https://lu.ma/${(event as any).lumaId}`}
+                    className="btn-gold px-8 py-4 text-base font-bold"
+                    data-luma-action="checkout"
+                    data-luma-event-id={(event as any).lumaId}
+                  >
                     Register Now
-                  </button>
-                  <button className="px-8 py-4 border border-border hover:bg-muted/50 rounded-md transition-colors text-base font-medium">
+                  </a>
+                  <a
+                    href={`https://lu.ma/${(event as any).lumaId}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="px-8 py-4 border border-border hover:bg-muted/50 rounded-md transition-colors text-base font-medium"
+                  >
                     View Details
-                  </button>
+                  </a>
                 </div>
               </div>
             </motion.div>

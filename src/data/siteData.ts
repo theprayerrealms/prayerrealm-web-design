@@ -26,6 +26,7 @@ export const events = [
     description: "Join believers from over 30 nations for an all-night prayer vigil streaming live worldwide. Experience a night of intense intercession, worship, and spiritual warfare as we lift up the nation and the world.",
     location: "Lagos, Nigeria & Online",
     image: "/images/event/wrestlelagos.png",
+    lumaId: "y9xvtl9o", // Update with real Luma ID
   },
   {
     id: 2,
@@ -35,6 +36,7 @@ export const events = [
     description: "A powerful service focused on healing prayers and spiritual restoration. Our team of ministers will lead a time of deep prayer for the body, mind, and soul, believing for miraculous breakthroughs.",
     location: "New York, USA & Online",
     image: "/images/event/wrerstlenyc.png",
+    lumaId: "y9xvtl9o",
   },
   {
     id: 3,
@@ -44,6 +46,7 @@ export const events = [
     description: "Empowering the next generation to build altars of prayer. This conference features dynamic workshops, youth-led prayer sessions, and inspiring messages to ignite a passion for Christ in your community.",
     location: "Lagos, Nigeria & Online",
     image: "/images/event/wrerstlenyc.png",
+    lumaId: "y9xvtl9o",
   },
 ];
 
