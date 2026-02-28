@@ -3,6 +3,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { HashRouter, Routes, Route } from "react-router-dom";
+import { RadioProvider } from "./contexts/RadioContext";
 import Layout from "./components/Layout";
 import Index from "./pages/Index";
 import About from "./pages/About";
@@ -25,22 +26,24 @@ const App = () => (
       <Toaster />
       <Sonner />
       <HashRouter>
-        <Layout>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/about" element={<About />} />
-            <Route path="/prayer-request" element={<PrayerWall />} />
-            <Route path="/events" element={<Events />} />
-            <Route path="/sermons" element={<Sermons />} />
-            <Route path="/volunteer" element={<Volunteer />} />
-            <Route path="/testimonies" element={<Testimonies />} />
-            <Route path="/prayer-wall" element={<PrayerWall />} />
-            <Route path="/give" element={<Give />} />
-            <Route path="/contact" element={<Contact />} />
-            <Route path="/radio" element={<PrayerRadio />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </Layout>
+        <RadioProvider>
+          <Layout>
+            <Routes>
+              <Route path="/" element={<Index />} />
+              <Route path="/about" element={<About />} />
+              <Route path="/prayer-request" element={<PrayerWall />} />
+              <Route path="/events" element={<Events />} />
+              <Route path="/sermons" element={<Sermons />} />
+              <Route path="/volunteer" element={<Volunteer />} />
+              <Route path="/testimonies" element={<Testimonies />} />
+              <Route path="/prayer-wall" element={<PrayerWall />} />
+              <Route path="/give" element={<Give />} />
+              <Route path="/contact" element={<Contact />} />
+              <Route path="/radio" element={<PrayerRadio />} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </Layout>
+        </RadioProvider>
       </HashRouter>
     </TooltipProvider>
   </QueryClientProvider>

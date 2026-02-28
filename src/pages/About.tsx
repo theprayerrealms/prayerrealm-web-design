@@ -15,25 +15,6 @@ const About = () => {
   return (
     <>
       <PageHero title="About Us" subtitle="Discover the heart behind Prayer Realm" />
-
-      <SectionWrapper>
-        <div className="max-w-3xl mx-auto text-center">
-          <h2 className="font-heading text-3xl md:text-4xl font-bold mb-6">
-            Who We <span className="gold-text">Are</span>
-          </h2>
-          <p className="text-muted-foreground text-lg leading-relaxed mb-4">
-            Prayer Realm is an international, non-denominational prayer ministry with a singular mission:
-            to raise global altars of prayer. Founded on the belief that prayer is the most powerful force
-            available to humanity, we connect believers from every nation to pray, intercede, and seek
-            God's face together.
-          </p>
-          <p className="text-muted-foreground text-lg leading-relaxed">
-            Our team of dedicated intercessors, pastors, and volunteers work around the clock to ensure
-            that no prayer goes unheard. We believe that when the church prays, heaven moves.
-          </p>
-        </div>
-      </SectionWrapper>
-
       <SectionWrapper className="bg-muted/30">
         <div className="text-center mb-12">
           <h2 className="font-heading text-3xl md:text-4xl font-bold mb-4">

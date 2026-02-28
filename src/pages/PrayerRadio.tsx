@@ -1,126 +1,14 @@
-import { useState, useRef, useEffect } from "react";
 import PageHero from "@/components/PageHero";
 import SectionWrapper from "@/components/SectionWrapper";
 import { Radio as RadioIcon, Volume2, VolumeX, Headphones, Play, Pause } from "lucide-react";
 import { motion } from "framer-motion";
-
-declare global {
-    interface Window {
-        onYouTubeIframeAPIReady: () => void;
-        YT: any;
-    }
-}
+import { useRadioEngine } from "../contexts/RadioContext";
 
 const PrayerRadio = () => {
-    const [isPlaying, setIsPlaying] = useState(false);
-    const [isMuted, setIsMuted] = useState(false);
-    const [volume, setVolume] = useState(50);
-    const [currentTime, setCurrentTime] = useState(0);
-    const [duration, setDuration] = useState(0);
-    const playerRef = useRef<any>(null);
-    const progressInterval = useRef<any>(null);
-
-    // YouTube Playlist ID - Update to your actual playlist
-    const playlistId = "PLy7iUq_1K7Y5-rQ_9Z6gY_6n-u7n9_9z6";
-
-    useEffect(() => {
-        // Load YouTube API
-        if (!window.YT) {
-            const tag = document.createElement("script");
-            tag.src = "https://www.youtube.com/iframe_api";
-            const firstScriptTag = document.getElementsByTagName("script")[0];
-            firstScriptTag.parentNode?.insertBefore(tag, firstScriptTag);
-
-            window.onYouTubeIframeAPIReady = () => {
-                initPlayer();
-            };
-        } else {
-            initPlayer();
-        }
-
-        return () => {
-            if (progressInterval.current) clearInterval(progressInterval.current);
-        };
-    }, []);
-
-    const initPlayer = () => {
-        playerRef.current = new window.YT.Player("youtube-player", {
-            events: {
-                onReady: (event: any) => {
-                    event.target.setVolume(volume);
-                    setDuration(event.target.getDuration());
-                },
-                onStateChange: (event: any) => {
-                    if (event.data === window.YT.PlayerState.PLAYING) {
-                        setIsPlaying(true);
-                        setDuration(event.target.getDuration());
-                        startProgressTimer();
-                    } else {
-                        setIsPlaying(false);
-                        stopProgressTimer();
-                    }
-                },
-            },
-        });
-    };
-
-    const startProgressTimer = () => {
-        if (progressInterval.current) clearInterval(progressInterval.current);
-        progressInterval.current = setInterval(() => {
-            if (playerRef.current && playerRef.current.getCurrentTime) {
-                setCurrentTime(playerRef.current.getCurrentTime());
-            }
-        }, 1000);
-    };
-
-    const stopProgressTimer = () => {
-        if (progressInterval.current) clearInterval(progressInterval.current);
-    };
-
-    const togglePlay = () => {
-        if (!playerRef.current) return;
-        if (isPlaying) {
-            playerRef.current.pauseVideo();
-        } else {
-            playerRef.current.playVideo();
-        }
-    };
-
-    const toggleMute = () => {
-        if (!playerRef.current) return;
-        if (isMuted) {
-            playerRef.current.unMute();
-            setIsMuted(false);
-        } else {
-            playerRef.current.mute();
-            setIsMuted(true);
-        }
-    };
-
-    const handleVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const newVolume = parseInt(e.target.value);
-        setVolume(newVolume);
-        if (playerRef.current) {
-            playerRef.current.setVolume(newVolume);
-            if (newVolume > 0 && isMuted) {
-                toggleMute();
-            }
-        }
-    };
-
-    const handleSeekChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const seekTo = parseFloat(e.target.value);
-        setCurrentTime(seekTo);
-        if (playerRef.current) {
-            playerRef.current.seekTo(seekTo, true);
-        }
-    };
-
-    const formatTime = (seconds: number) => {
-        const mins = Math.floor(seconds / 60);
-        const secs = Math.floor(seconds % 60);
-        return `${mins}:${secs.toString().padStart(2, "0")}`;
-    };
+    const {
+        isPlaying, isMuted, volume, trackInfo,
+        togglePlay, toggleMute, handleVolumeChange, syncToGlobalTime
+    } = useRadioEngine();
 
     return (
         <>
@@ -128,15 +16,6 @@ const PrayerRadio = () => {
                 title="Prayer Radio"
                 subtitle="Listen to continuous prayers, worship, and spiritual encouragement 24/7."
             />
-
-            <div id="youtube-player-container" className="hidden">
-                <div id="youtube-player"></div>
-                <iframe
-                    id="youtube-player-iframe"
-                    className="hidden"
-                    src={`https://www.youtube.com/embed/videoseries?list=${playlistId}&enablejsapi=1&autoplay=0`}
-                />
-            </div>
 
             <SectionWrapper>
                 <div className="max-w-4xl mx-auto">
@@ -168,10 +47,15 @@ const PrayerRadio = () => {
                                             <Headphones className="text-white" size={32} />
                                         </div>
                                         <div>
-                                            <h3 className="text-white font-bold text-xl uppercase tracking-tighter">
-                                                {isPlaying ? "Now Playing" : "Radio Standby"}
+                                            <div className="flex items-center gap-2 mb-1">
+                                                <span className="text-[10px] font-bold text-red-500 uppercase tracking-widest bg-red-500/10 px-2 py-0.5 rounded border border-red-500/20">
+                                                    {trackInfo.type}
+                                                </span>
+                                            </div>
+                                            <h3 className="text-white font-bold text-xl uppercase tracking-tighter line-clamp-1">
+                                                {trackInfo.title}
                                             </h3>
-                                            <p className="gold-text font-medium text-sm">Atmosphere Shifting Prayers</p>
+                                            <p className="gold-text font-medium text-sm line-clamp-1">{trackInfo.artist}</p>
                                         </div>
                                     </div>
 
@@ -188,7 +72,7 @@ const PrayerRadio = () => {
                                                 min="0"
                                                 max="100"
                                                 value={isMuted ? 0 : volume}
-                                                onChange={handleVolumeChange}
+                                                onChange={(e) => handleVolumeChange(parseInt(e.target.value))}
                                                 className="w-24 h-1 bg-white/10 rounded-full appearance-none cursor-pointer accent-red-600"
                                                 style={{
                                                     background: `linear-gradient(to right, #dc2626 0%, #dc2626 ${isMuted ? 0 : volume}%, rgba(255,255,255,0.1) ${isMuted ? 0 : volume}%, rgba(255,255,255,0.1) 100%)`
@@ -208,23 +92,29 @@ const PrayerRadio = () => {
                                     </div>
                                 </div>
 
-                                {/* Main Progress Slider */}
-                                <div className="space-y-2">
-                                    <input
-                                        type="range"
-                                        min="0"
-                                        max={duration || 100}
-                                        value={currentTime}
-                                        onChange={handleSeekChange}
-                                        className="w-full h-1.5 bg-white/10 rounded-full appearance-none cursor-pointer accent-red-600 focus:outline-none"
-                                        style={{
-                                            background: `linear-gradient(to right, #dc2626 0%, #dc2626 ${(currentTime / (duration || 1)) * 100}%, rgba(255,255,255,0.1) ${(currentTime / (duration || 1)) * 100}%, rgba(255,255,255,0.1) 100%)`
-                                        }}
-                                    />
-                                    <div className="flex justify-between text-[10px] uppercase font-bold text-white/40 tracking-widest">
-                                        <span>{formatTime(currentTime)}</span>
-                                        <span>{isPlaying ? "Live Stream" : "Ready"}</span>
-                                        <span>{formatTime(duration)}</span>
+                                {/* Live Radio Visualizer */}
+                                <div className="mt-8 bg-black/20 rounded-2xl p-4 md:px-8 border border-white/5 flex items-center justify-between">
+                                    <button
+                                        onClick={syncToGlobalTime}
+                                        title="Resync Live Radio Feed"
+                                        className="flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity"
+                                    >
+                                        <span className="relative flex h-3 w-3">
+                                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-75"></span>
+                                            <span className="relative inline-flex rounded-full h-3 w-3 bg-red-600"></span>
+                                        </span>
+                                        <span className="text-xs font-bold text-red-500 uppercase tracking-widest bg-red-500/10 px-3 py-1.5 rounded-full border border-red-500/20 hover:bg-red-500/20">Live Broadcast</span>
+                                    </button>
+
+                                    <div className="flex items-end gap-[4px] h-10">
+                                        {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((i) => (
+                                            <motion.div
+                                                key={i}
+                                                animate={{ height: isPlaying ? ["20%", "100%", "40%", "80%", "20%"] : "20%" }}
+                                                transition={{ duration: 1.5, repeat: Infinity, delay: i * 0.1, ease: "easeInOut" }}
+                                                className="w-2 md:w-2.5 bg-red-600 rounded-full opacity-80"
+                                            />
+                                        ))}
                                     </div>
                                 </div>
                             </div>
