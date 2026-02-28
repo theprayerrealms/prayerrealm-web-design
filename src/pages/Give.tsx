@@ -44,6 +44,7 @@ const Give = () => {
   const [selectedProvider, setSelectedProvider] = useState<"paystack" | "paypal" | null>(null);
   const [error, setError] = useState("");
   const [submitted, setSubmitted] = useState(false);
+  const [showRecurringModal, setShowRecurringModal] = useState(false);
 
   const finalAmount = selected ?? (custom ? Number(custom) : 0);
 
@@ -56,6 +57,19 @@ const Give = () => {
       return;
     }
 
+    if (recurring) {
+      // Show confirmation popup before payment providers pop up
+      setShowRecurringModal(true);
+    } else {
+      // Proceed directly to payment
+      setShowPaymentModal(true);
+      setPaymentStep("select");
+    }
+  };
+
+  const proceedToPayment = (keepRecurring: boolean) => {
+    setRecurring(keepRecurring);
+    setShowRecurringModal(false);
     setShowPaymentModal(true);
     setPaymentStep("select");
   };
@@ -202,15 +216,20 @@ const Give = () => {
               </div>
 
               {/* Recurring */}
-              <label className="flex items-center gap-3 mb-8 cursor-pointer">
+              <label className="flex items-center gap-3 mb-8 cursor-pointer w-max">
+                <input
+                  type="checkbox"
+                  className="hidden"
+                  checked={recurring}
+                  onChange={() => setRecurring(!recurring)}
+                />
                 <div
-                  onClick={() => setRecurring(!recurring)}
-                  className={`w-10 h-6 rounded-full flex items-center transition-colors cursor-pointer ${recurring ? "bg-accent justify-end" : "bg-secondary justify-start"
+                  className={`w-10 h-6 rounded-full flex items-center transition-colors ${recurring ? "bg-accent justify-end" : "bg-card border border-border justify-start"
                     }`}
                 >
-                  <div className="w-5 h-5 bg-card rounded-full shadow mx-0.5" />
+                  <div className={`w-5 h-5 rounded-full shadow mx-0.5 transition-colors ${recurring ? 'bg-white' : 'bg-muted-foreground'}`} />
                 </div>
-                <span className="text-sm">Make this a monthly donation</span>
+                <span className="text-sm font-medium">Make this a monthly donation</span>
               </label>
 
               <button
@@ -234,7 +253,38 @@ const Give = () => {
             </div>
           </div>
         </div >
-      </SectionWrapper >
+      </SectionWrapper>
+
+      {/* Recurring Confirmation Modal */}
+      <Dialog open={showRecurringModal} onOpenChange={setShowRecurringModal}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-center font-heading text-xl">Monthly Partnership</DialogTitle>
+            <DialogDescription className="text-center mt-2 text-base text-foreground">
+              Are you sure you want to make this a monthly payment?
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-2 text-center text-sm text-muted-foreground leading-relaxed">
+            By choosing <strong>Yes</strong>, you authorize the payment platform to automatically deduct this seed at the end of every month.
+            <br /><br />
+            This will require you to use a Debit/Credit Card for your first payment today to establish the authorization.
+          </div>
+          <div className="flex flex-col gap-3 mt-6">
+            <button
+              onClick={() => proceedToPayment(true)}
+              className="btn-gold w-full py-3 text-base font-semibold"
+            >
+              Yes, Make it Monthly
+            </button>
+            <button
+              onClick={() => proceedToPayment(false)}
+              className="w-full py-3 text-base font-medium rounded-lg bg-secondary hover:bg-secondary/80 border border-border transition-colors text-foreground"
+            >
+              No, Keep as One-Time Payment
+            </button>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Payment Selection Modal */}
       < Dialog open={showPaymentModal} onOpenChange={setShowPaymentModal} >

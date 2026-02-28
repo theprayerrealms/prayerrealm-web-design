@@ -95,21 +95,51 @@ export const RadioProvider = ({ children }: { children: React.ReactNode }) => {
             }
         }, 3 * 60 * 60 * 1000);
 
+        // Native Media Session Handlers for Mobile Lock Screen Controls
+        if ('mediaSession' in navigator) {
+            navigator.mediaSession.setActionHandler('play', () => {
+                togglePlay();
+            });
+            navigator.mediaSession.setActionHandler('pause', () => {
+                togglePlay();
+            });
+            // We intentionally do NOT define 'nexttrack' or 'previoustrack' because 
+            // no one should be able to skip a global live broadcast.
+        }
+
         return () => {
             stopEngine();
             clearInterval(autoSyncInterval);
         };
     }, []);
 
+    // HACK: To allow background audio on mobile devices, we must unlock the AudioContext
+    // by playing a tiny, silent piece of HTML5 audio upon explicit user interaction.
+    const hasUnlockedAudio = useRef(false);
+    const unlockBackgroundAudio = () => {
+        if (hasUnlockedAudio.current) return;
+        try {
+            // A tiny silent base64 audio string (1 second of silence)
+            const silentAudio = new Audio("data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA");
+            silentAudio.play().then(() => {
+                hasUnlockedAudio.current = true;
+                console.log("[RadioEngine] Background audio unlocked successfully.");
+            }).catch(e => console.log("Silent audio unlock failed:", e));
+        } catch (e) {
+            console.warn("Could not unlock background audio.");
+        }
+    };
+
     const initDualPlayers = () => {
+        // use playsinline=1 so iOS browsers don't force full screen, allowing background play
         playerA.current = new window.YT.Player("radio-player-a", {
             height: "10", width: "10",
-            playerVars: { autoplay: 0, controls: 0, disablekb: 1, modestbranding: 1, rel: 0 },
+            playerVars: { autoplay: 0, controls: 0, disablekb: 1, modestbranding: 1, rel: 0, playsinline: 1 },
             events: { onReady: () => handleReady("A"), onStateChange: (e: any) => handleStateChange("A", e), onError: (e: any) => handleError(e, "A") }
         });
         playerB.current = new window.YT.Player("radio-player-b", {
             height: "10", width: "10",
-            playerVars: { autoplay: 0, controls: 0, disablekb: 1, modestbranding: 1, rel: 0 },
+            playerVars: { autoplay: 0, controls: 0, disablekb: 1, modestbranding: 1, rel: 0, playsinline: 1 },
             events: { onReady: () => handleReady("B"), onStateChange: (e: any) => handleStateChange("B", e), onError: (e: any) => handleError(e, "B") }
         });
     };
@@ -206,10 +236,12 @@ export const RadioProvider = ({ children }: { children: React.ReactNode }) => {
         if (playerKey === activePlayer.current) {
             if (state === window.YT.PlayerState.PLAYING) {
                 setIsPlaying(true);
+                if ('mediaSession' in navigator) navigator.mediaSession.playbackState = "playing";
                 updateTrackInfo(player, SCHEDULE[currentSeqIndex.current].type);
                 if (!progressInterval.current) startEngineTimer();
             } else if (state === window.YT.PlayerState.PAUSED) {
                 setIsPlaying(false);
+                if ('mediaSession' in navigator) navigator.mediaSession.playbackState = "paused";
             } else if (state === window.YT.PlayerState.ENDED) {
                 if (!isTransitioning.current) {
                     performTransition(); // crossfade backup
@@ -235,6 +267,19 @@ export const RadioProvider = ({ children }: { children: React.ReactNode }) => {
         const data = player.getVideoData();
         if (data && data.title !== "") {
             setTrackInfo({ title: data.title, artist: data.author, type });
+
+            // Update Mobile Lock Screen Metadata
+            if ('mediaSession' in navigator) {
+                navigator.mediaSession.metadata = new MediaMetadata({
+                    title: data.title,
+                    artist: data.author || "Prayer Realm Broadcast",
+                    album: "Live 24/7 Radio",
+                    artwork: [
+                        { src: 'https://images.unsplash.com/photo-1542382156909-9ae37b3f56fd?q=80&w=256&h=256&fit=crop', sizes: '256x256', type: 'image/jpeg' },
+                        { src: 'https://images.unsplash.com/photo-1542382156909-9ae37b3f56fd?q=80&w=512&h=512&fit=crop', sizes: '512x512', type: 'image/jpeg' }
+                    ]
+                });
+            }
         }
     };
 
@@ -330,6 +375,7 @@ export const RadioProvider = ({ children }: { children: React.ReactNode }) => {
     };
 
     const togglePlay = () => {
+        unlockBackgroundAudio();
         const p = activePlayer.current === "A" ? playerA.current : playerB.current;
         if (!p || typeof p.getPlayerState !== 'function') return;
 
@@ -337,9 +383,11 @@ export const RadioProvider = ({ children }: { children: React.ReactNode }) => {
         if (isPlaying) {
             p.pauseVideo();
             setIsPlaying(false);
+            if ('mediaSession' in navigator) navigator.mediaSession.playbackState = "paused";
         } else {
             p.playVideo();
             setIsPlaying(true);
+            if ('mediaSession' in navigator) navigator.mediaSession.playbackState = "playing";
         }
     };
 
