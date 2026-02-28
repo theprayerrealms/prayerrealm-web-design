@@ -1,23 +1,125 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import PageHero from "@/components/PageHero";
 import SectionWrapper from "@/components/SectionWrapper";
-import { Radio as RadioIcon, Volume2, Headphones, Play, Pause } from "lucide-react";
+import { Radio as RadioIcon, Volume2, VolumeX, Headphones, Play, Pause } from "lucide-react";
 import { motion } from "framer-motion";
+
+declare global {
+    interface Window {
+        onYouTubeIframeAPIReady: () => void;
+        YT: any;
+    }
+}
 
 const PrayerRadio = () => {
     const [isPlaying, setIsPlaying] = useState(false);
-    const playerRef = useRef<HTMLIFrameElement>(null);
+    const [isMuted, setIsMuted] = useState(false);
+    const [volume, setVolume] = useState(50);
+    const [currentTime, setCurrentTime] = useState(0);
+    const [duration, setDuration] = useState(0);
+    const playerRef = useRef<any>(null);
+    const progressInterval = useRef<any>(null);
 
     // YouTube Playlist ID - Update to your actual playlist
     const playlistId = "PLy7iUq_1K7Y5-rQ_9Z6gY_6n-u7n9_9z6";
 
+    useEffect(() => {
+        // Load YouTube API
+        if (!window.YT) {
+            const tag = document.createElement("script");
+            tag.src = "https://www.youtube.com/iframe_api";
+            const firstScriptTag = document.getElementsByTagName("script")[0];
+            firstScriptTag.parentNode?.insertBefore(tag, firstScriptTag);
+
+            window.onYouTubeIframeAPIReady = () => {
+                initPlayer();
+            };
+        } else {
+            initPlayer();
+        }
+
+        return () => {
+            if (progressInterval.current) clearInterval(progressInterval.current);
+        };
+    }, []);
+
+    const initPlayer = () => {
+        playerRef.current = new window.YT.Player("youtube-player", {
+            events: {
+                onReady: (event: any) => {
+                    event.target.setVolume(volume);
+                    setDuration(event.target.getDuration());
+                },
+                onStateChange: (event: any) => {
+                    if (event.data === window.YT.PlayerState.PLAYING) {
+                        setIsPlaying(true);
+                        setDuration(event.target.getDuration());
+                        startProgressTimer();
+                    } else {
+                        setIsPlaying(false);
+                        stopProgressTimer();
+                    }
+                },
+            },
+        });
+    };
+
+    const startProgressTimer = () => {
+        if (progressInterval.current) clearInterval(progressInterval.current);
+        progressInterval.current = setInterval(() => {
+            if (playerRef.current && playerRef.current.getCurrentTime) {
+                setCurrentTime(playerRef.current.getCurrentTime());
+            }
+        }, 1000);
+    };
+
+    const stopProgressTimer = () => {
+        if (progressInterval.current) clearInterval(progressInterval.current);
+    };
+
     const togglePlay = () => {
-        const action = isPlaying ? "pauseVideo" : "playVideo";
-        playerRef.current?.contentWindow?.postMessage(
-            JSON.stringify({ event: "command", func: action, args: [] }),
-            "*"
-        );
-        setIsPlaying(!isPlaying);
+        if (!playerRef.current) return;
+        if (isPlaying) {
+            playerRef.current.pauseVideo();
+        } else {
+            playerRef.current.playVideo();
+        }
+    };
+
+    const toggleMute = () => {
+        if (!playerRef.current) return;
+        if (isMuted) {
+            playerRef.current.unMute();
+            setIsMuted(false);
+        } else {
+            playerRef.current.mute();
+            setIsMuted(true);
+        }
+    };
+
+    const handleVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const newVolume = parseInt(e.target.value);
+        setVolume(newVolume);
+        if (playerRef.current) {
+            playerRef.current.setVolume(newVolume);
+            if (newVolume > 0 && isMuted) {
+                toggleMute();
+            }
+        }
+    };
+
+    const handleSeekChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const seekTo = parseFloat(e.target.value);
+        setCurrentTime(seekTo);
+        if (playerRef.current) {
+            playerRef.current.seekTo(seekTo, true);
+        }
+    };
+
+    const formatTime = (seconds: number) => {
+        const mins = Math.floor(seconds / 60);
+        const secs = Math.floor(seconds % 60);
+        return `${mins}:${secs.toString().padStart(2, "0")}`;
     };
 
     return (
@@ -27,18 +129,18 @@ const PrayerRadio = () => {
                 subtitle="Listen to continuous prayers, worship, and spiritual encouragement 24/7."
             />
 
-            {/* Hidden YouTube Player */}
-            <iframe
-                ref={playerRef}
-                className="hidden"
-                src={`https://www.youtube.com/embed/videoseries?list=${playlistId}&enablejsapi=1&autoplay=0`}
-                allow="autoplay"
-            />
+            <div id="youtube-player-container" className="hidden">
+                <div id="youtube-player"></div>
+                <iframe
+                    id="youtube-player-iframe"
+                    className="hidden"
+                    src={`https://www.youtube.com/embed/videoseries?list=${playlistId}&enablejsapi=1&autoplay=0`}
+                />
+            </div>
 
             <SectionWrapper>
                 <div className="max-w-4xl mx-auto">
                     <div className="glass-card rounded-[2.5rem] p-8 md:p-12 text-center relative overflow-hidden">
-                        {/* Design Elements */}
                         <div className="blur-orb w-[300px] h-[300px] bg-red-600/10 -top-20 -left-20" />
                         <div className="blur-orb w-[250px] h-[250px] bg-gold-500/10 -bottom-20 -right-20" />
 
@@ -59,9 +161,8 @@ const PrayerRadio = () => {
                                 Streaming atmosphere-shifting sounds and fervent prayers directly to your device. Stay connected to the altar wherever you are.
                             </p>
 
-                            {/* Radio Player */}
                             <div className="bg-navy rounded-3xl p-8 border border-white/10 shadow-2xl">
-                                <div className="flex flex-col md:flex-row items-center justify-between gap-8">
+                                <div className="flex flex-col md:flex-row items-center justify-between gap-8 mb-8">
                                     <div className="flex items-center gap-6 text-left">
                                         <div className="w-20 h-20 bg-gold-gradient rounded-xl flex items-center justify-center shrink-0 shadow-lg">
                                             <Headphones className="text-white" size={32} />
@@ -75,9 +176,25 @@ const PrayerRadio = () => {
                                     </div>
 
                                     <div className="flex items-center gap-6">
-                                        <button className="w-16 h-16 bg-white/5 hover:bg-white/10 rounded-full flex items-center justify-center transition-all border border-white/10">
-                                            <Volume2 className="text-white" size={24} />
-                                        </button>
+                                        <div className="flex flex-col items-center gap-2">
+                                            <button
+                                                onClick={toggleMute}
+                                                className="w-12 h-12 bg-white/5 hover:bg-white/10 rounded-full flex items-center justify-center transition-all border border-white/10"
+                                            >
+                                                {isMuted || volume === 0 ? <VolumeX className="text-red-500" size={20} /> : <Volume2 className="text-white" size={20} />}
+                                            </button>
+                                            <input
+                                                type="range"
+                                                min="0"
+                                                max="100"
+                                                value={isMuted ? 0 : volume}
+                                                onChange={handleVolumeChange}
+                                                className="w-24 h-1 bg-white/10 rounded-full appearance-none cursor-pointer accent-red-600"
+                                                style={{
+                                                    background: `linear-gradient(to right, #dc2626 0%, #dc2626 ${isMuted ? 0 : volume}%, rgba(255,255,255,0.1) ${isMuted ? 0 : volume}%, rgba(255,255,255,0.1) 100%)`
+                                                }}
+                                            />
+                                        </div>
                                         <button
                                             onClick={togglePlay}
                                             className="w-20 h-20 bg-red-600 hover:bg-red-700 rounded-full flex items-center justify-center transition-all shadow-xl shadow-red-600/20 group"
@@ -91,17 +208,24 @@ const PrayerRadio = () => {
                                     </div>
                                 </div>
 
-                                {/* Progress Bar */}
-                                <div className="mt-8 h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
-                                    <motion.div
-                                        animate={isPlaying ? { width: ["20%", "85%", "40%"] } : { width: "0%" }}
-                                        transition={{ duration: 4, repeat: Infinity, repeatType: "mirror" }}
-                                        className="h-full bg-red-600"
+                                {/* Main Progress Slider */}
+                                <div className="space-y-2">
+                                    <input
+                                        type="range"
+                                        min="0"
+                                        max={duration || 100}
+                                        value={currentTime}
+                                        onChange={handleSeekChange}
+                                        className="w-full h-1.5 bg-white/10 rounded-full appearance-none cursor-pointer accent-red-600 focus:outline-none"
+                                        style={{
+                                            background: `linear-gradient(to right, #dc2626 0%, #dc2626 ${(currentTime / (duration || 1)) * 100}%, rgba(255,255,255,0.1) ${(currentTime / (duration || 1)) * 100}%, rgba(255,255,255,0.1) 100%)`
+                                        }}
                                     />
-                                </div>
-                                <div className="flex justify-between mt-2 text-[10px] uppercase font-bold text-white/40 tracking-widest">
-                                    <span>{isPlaying ? "Live Stream" : "Ready to Play"}</span>
-                                    <span>24/7 Global Altar</span>
+                                    <div className="flex justify-between text-[10px] uppercase font-bold text-white/40 tracking-widest">
+                                        <span>{formatTime(currentTime)}</span>
+                                        <span>{isPlaying ? "Live Stream" : "Ready"}</span>
+                                        <span>{formatTime(duration)}</span>
+                                    </div>
                                 </div>
                             </div>
 
