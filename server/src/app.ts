@@ -13,6 +13,7 @@ import eventRoutes from './modules/events/event.routes';
 import sermonRoutes from './modules/sermons';
 import volunteerRoutes from './modules/volunteers/volunteer.routes';
 import adminRoutes from './modules/admin/admin.routes';
+import contactRoutes from './modules/contact/contact.routes';
 import { errorHandler } from './middlewares/error.middleware';
 
 const app: Application = express();
@@ -40,6 +41,7 @@ app.use('/api/events', eventRoutes);
 app.use('/api/sermons', sermonRoutes);
 app.use('/api/volunteers', volunteerRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/contact', contactRoutes);
 
 // Health Check
 app.get('/health', (req, res) => res.status(200).json({ status: 'OK' }));
