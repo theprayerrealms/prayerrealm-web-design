@@ -221,6 +221,29 @@
   .blur-orb {
     @apply absolute rounded-full mix-blend-screen filter blur-[80px] opacity-30 animate-pulse;
   }
+
+  .live-indicator {
+    @apply w-3 h-3 rounded-full bg-red-600;
+    box-shadow: 0 0 0 rgba(220, 38, 38, 0.4);
+    animation: pulse-red 2s infinite;
+  }
+}
+
+@keyframes pulse-red {
+  0% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.7);
+  }
+
+  70% {
+    transform: scale(1);
+    box-shadow: 0 0 0 10px rgba(220, 38, 38, 0);
+  }
+
+  100% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(220, 38, 38, 0);
+  }
 }
 
 .mesh-gradient {

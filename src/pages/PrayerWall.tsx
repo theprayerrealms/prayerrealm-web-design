@@ -4,6 +4,7 @@ import SectionWrapper from "@/components/SectionWrapper";
 import { prayerWallPosts, countries, prayerCategories } from "@/data/siteData";
 import { motion, AnimatePresence } from "framer-motion";
 import { Heart, Globe, Send, Shield, AlertCircle, Plus } from "lucide-react";
+import MiniRadioPlayer from "@/components/MiniRadioPlayer";
 
 const PrayerWall = () => {
   const [posts, setPosts] = useState(prayerWallPosts);
@@ -337,6 +338,8 @@ const PrayerWall = () => {
           </div>
         </SectionWrapper>
       )}
+
+      <MiniRadioPlayer />
     </>
   );
 };

@@ -5,8 +5,12 @@ import SectionWrapper from "@/components/SectionWrapper";
 import AnimatedCounter from "@/components/AnimatedCounter";
 import { impactStats, events, testimonies } from "@/data/siteData";
 import { Calendar, Heart, Globe, ArrowRight } from "lucide-react";
+import { useLiveStatus } from "@/hooks/useLiveStatus";
 
 const Index = () => {
+  const isLive = useLiveStatus();
+  const telegramLink = "https://t.me/theprayerrealm"; // Replace with actual link
+
   return (
     <>
       {/* Hero */}
@@ -14,6 +18,16 @@ const Index = () => {
         <img src={heroBg} alt="Global prayer gathering" className="absolute inset-0 w-full h-full object-cover" />
         <div className="gradient-navy-overlay absolute inset-0" />
         <div className="relative z-10 text-center px-4 max-w-4xl mx-auto">
+          {isLive && (
+            <motion.div
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-red-600/20 border border-red-600/50 mb-6 backdrop-blur-sm"
+            >
+              <div className="live-indicator" />
+              <span className="text-red-500 font-bold text-xs uppercase tracking-widest animate-pulse">Live Prayer Session On</span>
+            </motion.div>
+          )}
           <motion.p
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -48,9 +62,20 @@ const Index = () => {
             <Link to="/prayer-wall" className="btn-gold text-base">
               Submit Prayer Request
             </Link>
-            <Link to="/events" className="btn-outline-light text-base">
-              Join Live Prayer
-            </Link>
+            {isLive ? (
+              <a
+                href={telegramLink}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn-gold text-base bg-red-600 hover:bg-red-700 border-none animate-bounce"
+              >
+                Join Live Prayer
+              </a>
+            ) : (
+              <Link to="/radio" className="btn-outline-light text-base">
+                Join Live Prayer
+              </Link>
+            )}
             <Link to="/give" className="btn-outline-light text-base">
               Give Now
             </Link>

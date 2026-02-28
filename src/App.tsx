@@ -14,6 +14,7 @@ import Testimonies from "./pages/Testimonies";
 import PrayerWall from "./pages/PrayerWall";
 import Give from "./pages/Give";
 import Contact from "./pages/Contact";
+import PrayerRadio from "./pages/PrayerRadio";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -36,6 +37,7 @@ const App = () => (
             <Route path="/prayer-wall" element={<PrayerWall />} />
             <Route path="/give" element={<Give />} />
             <Route path="/contact" element={<Contact />} />
+            <Route path="/radio" element={<PrayerRadio />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </Layout>
