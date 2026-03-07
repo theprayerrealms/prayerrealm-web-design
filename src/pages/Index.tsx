@@ -1,23 +1,100 @@
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { motion } from "framer-motion";
-import heroBg from "@/assets/hero-bg.jpg";
+import { motion, AnimatePresence } from "framer-motion";
 import SectionWrapper from "@/components/SectionWrapper";
 import AnimatedCounter from "@/components/AnimatedCounter";
 import { impactStats, events, testimonies } from "@/data/siteData";
-import { Calendar, Heart, Globe, ArrowRight } from "lucide-react";
+import { Calendar, Heart, Globe, ArrowRight, ChevronLeft, ChevronRight, Instagram, Send } from "lucide-react";
 import { useLiveStatus } from "@/hooks/useLiveStatus";
+
+// Import local hero images
+// Using the existing hero-bg.jpg for the first one.
+import heroBg1 from "@/assets/1.jpg";
+// Note: Please add your 5 custom images into the 'src/assets/hero-images' folder 
+// named 'hero-2.jpg', 'hero-3.jpg', etc., or change these imports to match your filenames!
+import heroBg2 from "@/assets/2.jpg"; // Placeholder, replace with "@/assets/hero-images/hero-2.jpg"
+import heroBg3 from "@/assets/3.jpg"; // Placeholder, replace with "@/assets/hero-images/hero-3.jpg"
+import heroBg4 from "@/assets/4.jpg"; // Placeholder, replace with "@/assets/hero-images/hero-4.jpg"
+import heroBg5 from "@/assets/5.jpg"; // Placeholder, replace with "@/assets/hero-images/hero-5.jpg"
+import heroBg6 from "@/assets/6.jpg"; // Placeholder, replace with "@/assets/hero-images/hero-6.jpg"
+import heroBg7 from "@/assets/7.jpg"; // Placeholder, replace with "@/assets/hero-images/hero-6.jpg"
+import heroBg8 from "@/assets/8.jpg"; // Placeholder, replace with "@/assets/hero-images/hero-6.jpg"
+import heroBg9 from "@/assets/9.jpg"; // Placeholder, replace with "@/assets/hero-images/hero-6.jpg"
+const heroImages = [
+  heroBg1,
+  heroBg2,
+  heroBg3,
+  heroBg4,
+  heroBg5,
+  heroBg6,
+  heroBg7,
+  heroBg8,
+  heroBg9
+];
 
 const Index = () => {
   const isLive = useLiveStatus();
-  const telegramLink = "https://t.me/theprayerrealm"; // Replace with actual link
+  const telegramLink = "https://t.me/theprayerrealms"; // Replace with actual link
+  const [currentIdx, setCurrentIdx] = useState(0);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentIdx((prev) => (prev + 1) % heroImages.length);
+    }, 6000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const nextSlide = () => setCurrentIdx((prev) => (prev + 1) % heroImages.length);
+  const prevSlide = () => setCurrentIdx((prev) => (prev - 1 + heroImages.length) % heroImages.length);
 
   return (
     <>
       {/* Hero */}
-      <section className="relative min-h-[90vh] flex items-center justify-center overflow-hidden">
-        <img src={heroBg} alt="Global prayer gathering" className="absolute inset-0 w-full h-full object-cover" />
-        <div className="gradient-navy-overlay absolute inset-0" />
-        <div className="relative z-10 text-center px-4 max-w-4xl mx-auto">
+      <section className="relative min-h-[90vh] flex items-center justify-center overflow-hidden group">
+        <AnimatePresence mode="popLayout">
+          <motion.img
+            key={currentIdx}
+            src={heroImages[currentIdx]}
+            alt={`Global prayer gathering ${currentIdx + 1}`}
+            initial={{ opacity: 0, scale: 1.05 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 1.5, ease: "easeInOut" }}
+            className="absolute inset-0 w-full h-full object-cover"
+          />
+        </AnimatePresence>
+        <div className="gradient-navy-overlay absolute inset-0 z-10" />
+
+        {/* Slider Controls */}
+        <button
+          onClick={prevSlide}
+          className="absolute left-4 md:left-8 z-30 p-2 md:p-3 rounded-full bg-black/20 text-white/70 hover:bg-black/60 hover:text-white opacity-0 group-hover:opacity-100 transition-all duration-300 backdrop-blur-md"
+          aria-label="Previous slide"
+        >
+          <ChevronLeft size={24} />
+        </button>
+        <button
+          onClick={nextSlide}
+          className="absolute right-4 md:right-8 z-30 p-2 md:p-3 rounded-full bg-black/20 text-white/70 hover:bg-black/60 hover:text-white opacity-0 group-hover:opacity-100 transition-all duration-300 backdrop-blur-md"
+          aria-label="Next slide"
+        >
+          <ChevronRight size={24} />
+        </button>
+
+        {/* Slide Indicators */}
+        <div className="absolute bottom-8 left-0 right-0 z-30 flex justify-center gap-3">
+          {heroImages.map((_, idx) => (
+            <button
+              key={idx}
+              onClick={() => setCurrentIdx(idx)}
+              className={`h-2 rounded-full transition-all duration-500 ${idx === currentIdx ? "bg-red-600 w-8" : "bg-white/50 hover:bg-white/80 w-2"
+                }`}
+              aria-label={`Go to slide ${idx + 1}`}
+            />
+          ))}
+        </div>
+
+        <div className="relative z-20 text-center px-4 max-w-4xl mx-auto mt-12">
           {isLive && (
             <motion.div
               initial={{ opacity: 0, y: -20 }}
@@ -59,9 +136,9 @@ const Index = () => {
             transition={{ duration: 0.6, delay: 0.45 }}
             className="flex flex-wrap justify-center gap-4"
           >
-            <Link to="/prayer-wall" className="btn-gold text-base">
-              Submit Prayer Request
-            </Link>
+            <a href={telegramLink} target="_blank" rel="noopener noreferrer" className="btn-gold text-base animate-pulse hover:animate-none">
+              Join our Telegram channel now
+            </a>
             {isLive ? (
               <a
                 href={telegramLink}
@@ -128,15 +205,41 @@ const Index = () => {
             <motion.div
               key={event.id}
               whileHover={{ y: -4 }}
-              className="card-elevated p-6"
+              className="card-elevated overflow-hidden flex flex-col"
             >
-              <div className="flex items-center gap-2 text-red-600 text-sm font-medium mb-3">
-                <Calendar size={16} />
-                {event.date}
+              {/* Event Image */}
+              <div className="h-48 overflow-hidden bg-muted relative">
+                {event.image ? (
+                  <img src={event.image} alt={event.title} className="w-full h-full object-cover transition-transform duration-500 hover:scale-110" />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center text-muted-foreground/50">
+                    <Calendar size={48} />
+                  </div>
+                )}
+                <div className="absolute top-3 right-3 bg-red-600 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg">
+                  {event.date.split(',')[0]} {/* Extracts just Month & Day usually */}
+                </div>
               </div>
-              <h3 className="font-heading text-xl font-semibold mb-2">{event.title}</h3>
-              <p className="text-muted-foreground text-sm mb-1">{event.time} • {event.location}</p>
-              <p className="text-muted-foreground text-sm mt-3">{event.description}</p>
+
+              {/* Event Content */}
+              <div className="p-6 flex-1 flex flex-col">
+                <h3 className="font-heading text-xl font-semibold mb-2 line-clamp-1">{event.title}</h3>
+                <div className="flex flex-col gap-1 mb-3">
+                  <div className="flex items-center gap-2 text-muted-foreground text-sm">
+                    <Calendar size={14} className="text-red-500" />
+                    <span>{event.time}</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-muted-foreground text-sm">
+                    <Globe size={14} className="text-red-500" />
+                    <span className="line-clamp-1">{event.location}</span>
+                  </div>
+                </div>
+                <p className="text-muted-foreground text-sm mt-1 mb-4 line-clamp-3 flex-1">{event.description}</p>
+
+                <Link to="/events" className="mt-auto text-red-600 font-medium text-sm inline-flex items-center gap-1 hover:gap-2 transition-all">
+                  Event Details <ArrowRight size={14} />
+                </Link>
+              </div>
             </motion.div>
           ))}
         </div>
@@ -168,18 +271,31 @@ const Index = () => {
         </div>
       </SectionWrapper>
 
-      {/* World Map Section */}
+      {/* Social Media Section */}
       <SectionWrapper dark>
-        <div className="text-center">
-          <Globe size={48} className="gold-text mx-auto mb-6" />
+        <div className="text-center max-w-4xl mx-auto">
+          <div className="flex justify-center gap-6 mb-8">
+            <div className="bg-white/5 p-4 rounded-full border border-white/10 hover:bg-white/10 transition-colors">
+              <Send size={40} className="text-[#0088cc]" />
+            </div>
+            <div className="bg-white/5 p-4 rounded-full border border-white/10 hover:bg-white/10 transition-colors">
+              <Instagram size={40} className="text-[#E1306C]" />
+            </div>
+          </div>
           <h2 className="font-heading text-3xl md:text-4xl font-bold mb-4">
-            Praying Across the <span className="gold-gradient-text">Globe</span>
+            Connect With Us On <span className="gold-gradient-text">Social Media</span>
           </h2>
           <p className="text-primary-foreground/60 max-w-2xl mx-auto mb-8">
-            Our prayer network spans over 54 nations, with intercessors standing in the gap for every continent.
-            From Asia to Africa, Europe to the Americas — the altar of prayer is being raised.
+            Join our vibrant community online! Follow our Instagram for daily encouragement, live updates, and testimonies. Join our Telegram channel to participate in our live global prayer sessions and receive immediate updates.
           </p>
-          <div className="text-6xl md:text-8xl opacity-30">🌍</div>
+          <div className="flex flex-wrap justify-center gap-4 mt-8">
+            <a href="https://t.me/theprayerrealms" target="_blank" rel="noopener noreferrer" className="btn-gold text-base flex items-center gap-2">
+              <Send size={18} /> Join Telegram
+            </a>
+            <a href="https://www.instagram.com/prayerrealms/" target="_blank" rel="noopener noreferrer" className="btn-outline-light text-base flex items-center gap-2">
+              <Instagram size={18} /> Follow Instagram
+            </a>
+          </div>
         </div>
       </SectionWrapper>
 
@@ -201,8 +317,8 @@ const Index = () => {
       {/* Newsletter */}
       <SectionWrapper className="bg-secondary">
         <div className="text-center max-w-xl mx-auto">
-          <h2 className="font-heading text-3xl font-bold mb-4">Stay Connected</h2>
-          <p className="text-muted-foreground mb-6">
+          <h2 className="font-heading text-3xl font-bold mb-4 text-white">Stay Connected</h2>
+          <p className="text-white/90 mb-6">
             Receive prayer updates, event announcements, and weekly encouragement from Prayer Realm.
           </p>
           <form className="flex gap-3" onSubmit={(e) => e.preventDefault()}>
@@ -211,7 +327,7 @@ const Index = () => {
               placeholder="Enter your email"
               className="flex-1 bg-card border border-border rounded-md px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-accent"
             />
-            <button type="submit" className="btn-gold whitespace-nowrap">
+            <button type="submit" className="bg-white text-red-600 hover:bg-white/90 font-medium px-6 py-3 rounded-md transition-all whitespace-nowrap">
               Subscribe
             </button>
           </form>

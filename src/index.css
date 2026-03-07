@@ -26,20 +26,20 @@
     --primary-foreground: 0 0% 100%;
     /* white */
 
-    --secondary: 60 100% 50%;
-    /* yellow */
-    --secondary-foreground: 0 0% 0%;
-    /* black */
+    --secondary: 0 100% 50%;
+    /* red */
+    --secondary-foreground: 0 0% 100%;
+    /* white */
 
     --muted: 0 0% 95%;
     /* light gray */
     --muted-foreground: 0 0% 40%;
     /* dark gray */
 
-    --accent: 60 100% 50%;
-    /* yellow */
-    --accent-foreground: 0 0% 0%;
-    /* black */
+    --accent: 0 100% 50%;
+    /* red */
+    --accent-foreground: 0 0% 100%;
+    /* white */
 
     --destructive: 0 100% 50%;
     /* red */
@@ -55,10 +55,10 @@
 
     --radius: 0.5rem;
 
-    --gold: 60 100% 50%;
-    /* yellow */
-    --gold-light: 60 100% 70%;
-    --gold-dark: 60 100% 40%;
+    --gold: 0 100% 50%;
+    /* red */
+    --gold-light: 0 100% 70%;
+    --gold-dark: 0 100% 40%;
     --navy: 0 0% 0%;
     /* black */
     --navy-light: 0 0% 20%;
@@ -102,18 +102,18 @@
     /* red */
     --primary-foreground: 0 0% 0%;
     /* black */
-    --secondary: 60 100% 50%;
-    /* yellow */
-    --secondary-foreground: 0 0% 0%;
-    /* black */
+    --secondary: 0 100% 50%;
+    /* red */
+    --secondary-foreground: 0 0% 100%;
+    /* white */
     --muted: 0 0% 20%;
     /* dark gray */
     --muted-foreground: 0 0% 70%;
     /* light gray */
-    --accent: 60 100% 50%;
-    /* yellow */
-    --accent-foreground: 0 0% 0%;
-    /* black */
+    --accent: 0 100% 50%;
+    /* red */
+    --accent-foreground: 0 0% 100%;
+    /* white */
     --destructive: 0 100% 50%;
     /* red */
     --destructive-foreground: 0 0% 100%;
@@ -171,11 +171,11 @@
   }
 
   .gold-text {
-    color: hsl(60 100% 50%);
+    color: hsl(0 100% 50%);
   }
 
   .gold-gradient-text {
-    background: linear-gradient(135deg, hsl(60 100% 70%), hsl(60 100% 50%), hsl(60 100% 40%));
+    background: linear-gradient(135deg, hsl(0 100% 70%), hsl(0 100% 50%), hsl(0 100% 40%));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -206,8 +206,8 @@
 
   .btn-outline-light:hover {
     background: hsl(0 0% 100% / 0.1);
-    border-color: hsl(60 100% 50%);
-    color: hsl(60 100% 50%);
+    border-color: hsl(0 100% 50%);
+    color: hsl(0 100% 50%);
   }
 
   .gold-spinner {
@@ -250,7 +250,7 @@
   background-color: #000;
   background-image:
     radial-gradient(at 0% 0%, hsla(0, 100%, 50%, 0.15) 0, transparent 50%),
-    radial-gradient(at 50% 0%, hsla(60, 100%, 50%, 0.1) 0, transparent 50%),
+    radial-gradient(at 50% 0%, hsla(0, 100%, 50%, 0.1) 0, transparent 50%),
     radial-gradient(at 100% 0%, hsla(240, 100%, 50%, 0.15) 0, transparent 50%);
 }
 
