@@ -18,12 +18,20 @@ import {
   Clock,
   LayoutDashboard,
   ShieldAlert,
-  Trash2
+  Trash2,
+  Lock,
+  Eye,
+  EyeOff
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "@/components/ui/use-toast";
 
 const Admin = () => {
+    const [isAuthenticated, setIsAuthenticated] = useState(false);
+    const [password, setPassword] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
+    const [loginError, setLoginError] = useState('');
+
     const [activeTab, setActiveTab] = useState<'overview' | 'registrations' | 'events' | 'prayers' | 'testimonies'>('overview');
     const [isLoading, setIsLoading] = useState(true);
     const [regFilters, setRegFilters] = useState({
@@ -204,6 +212,91 @@ const Admin = () => {
         setEditingEventId(event.id);
         setIsCreatingEvent(true);
     };
+
+    const handleLogin = (e: React.FormEvent) => {
+        e.preventDefault();
+        const adminPass = import.meta.env.VITE_ADMIN_PASSWORD || 'Command@2026';
+        if (password === adminPass) {
+            setIsAuthenticated(true);
+            setLoginError('');
+            toast({ title: "Access Granted", description: "Welcome to the Command Desk." });
+        } else {
+            setLoginError('Invalid access code.');
+            toast({ title: "Access Denied", description: "Invalid admin password.", variant: "destructive" });
+        }
+    };
+
+    if (!isAuthenticated) {
+        return (
+            <div className="min-h-screen bg-[#070708] flex items-center justify-center p-6 relative overflow-hidden mt-16 md:mt-20">
+                {/* Visual Background Elements */}
+                <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-red-600/5 rounded-[100%] blur-[120px] pointer-events-none" />
+                <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-amber-600/5 rounded-[100%] blur-[120px] pointer-events-none" />
+
+                <motion.div 
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5 }}
+                    className="glass-card p-10 md:p-12 rounded-[3rem] border-white/5 max-w-md w-full relative z-10 shadow-2xl"
+                >
+                    <div className="flex justify-center mb-8">
+                        <div className="w-16 h-16 bg-red-600 rounded-2xl flex items-center justify-center shadow-[0_0_30px_rgba(220,38,38,0.3)]">
+                            <ShieldAlert size={32} className="text-white" />
+                        </div>
+                    </div>
+                    
+                    <div className="text-center mb-10">
+                        <h2 className="text-3xl font-black text-white italic tracking-tighter uppercase mb-2">
+                            Command <span className="gold-text">Desk</span>
+                        </h2>
+                        <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest px-4">
+                            Authorized Personnel Only
+                        </p>
+                    </div>
+
+                    <form onSubmit={handleLogin} className="space-y-6">
+                        <div className="space-y-2">
+                            <label className="text-[10px] font-bold text-white/30 uppercase tracking-widest ml-1">Access Code</label>
+                            <div className="relative">
+                                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-white/40">
+                                    <Lock size={18} />
+                                </span>
+                                <input 
+                                    type={showPassword ? "text" : "password"} 
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                    placeholder="Enter authorization code"
+                                    className={`w-full bg-white/5 border ${loginError ? 'border-red-500' : 'border-white/10'} rounded-2xl pl-12 pr-12 py-4 text-sm focus:outline-none focus:border-red-600 text-white transition-all`}
+                                    required
+                                />
+                                <button 
+                                    type="button"
+                                    onClick={() => setShowPassword(!showPassword)}
+                                    className="absolute right-4 top-1/2 -translate-y-1/2 text-white/40 hover:text-white transition-colors"
+                                >
+                                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                                </button>
+                            </div>
+                            {loginError && <p className="text-[10px] font-bold text-red-500 uppercase italic ml-1 mt-1">{loginError}</p>}
+                        </div>
+
+                        <button 
+                            type="submit" 
+                            className="w-full bg-red-600 hover:bg-red-700 text-white py-4 rounded-2xl font-bold italic transition-all uppercase tracking-widest hover:shadow-[0_0_20px_rgba(220,38,38,0.4)]"
+                        >
+                            Authenticate
+                        </button>
+                    </form>
+                    
+                    <div className="mt-8 text-center">
+                        <p className="text-[9px] text-white/20 uppercase tracking-widest font-black">
+                            Security Protocol Alpha-7 Active
+                        </p>
+                    </div>
+                </motion.div>
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen bg-[#070708] flex mt-16 md:mt-20">
