@@ -1,7 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import jwt from 'jsonwebtoken';
-import { config } from '../config/db';
-import { User } from '../modules/users/user.model';
+import { db, auth } from '../config/firebase';
 
 export const protect = async (req: any, res: Response, next: NextFunction) => {
     let token;
@@ -14,10 +12,17 @@ export const protect = async (req: any, res: Response, next: NextFunction) => {
     }
 
     try {
-        const decoded: any = jwt.verify(token, config.JWT.ACCESS_SECRET);
-        req.user = await User.findById(decoded.id).select('-password');
+        const decodedToken = await auth.verifyIdToken(token);
+        const userSnapshot = await db.collection('users').doc(decodedToken.uid).get();
+        
+        if (!userSnapshot.exists) {
+            return res.status(404).json({ message: 'User not found in Firestore' });
+        }
+
+        req.user = { id: userSnapshot.id, ...userSnapshot.data() };
         next();
     } catch (error) {
+        console.error('Auth Error:', error);
         res.status(401).json({ message: 'Not authorized, token failed' });
     }
 };

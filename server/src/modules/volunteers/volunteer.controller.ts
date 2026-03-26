@@ -1,15 +1,19 @@
 import { Request, Response } from 'express';
-import { VolunteerApplication } from './volunteer.model';
+import { db } from '../../config/firebase';
 import { sendVolunteerConfirmation } from '../../utils/email';
 
 export const applyAsVolunteer = async (req: any, res: Response) => {
     try {
-        const application = await VolunteerApplication.create({
+        const applicationData = {
             ...req.body,
-            userId: req.user?._id
-        });
+            userId: req.user?.id || null,
+            status: 'PENDING',
+            createdAt: new Date().toISOString()
+        };
+        
+        const docRef = await db.collection('volunteers').add(applicationData);
 
-        // Send confirmation email to the volunteer
+        // Send confirmation email
         const { fullName, email, interests } = req.body;
         if (email) {
             await sendVolunteerConfirmation({
@@ -19,7 +23,7 @@ export const applyAsVolunteer = async (req: any, res: Response) => {
             });
         }
 
-        res.status(201).json(application);
+        res.status(201).json({ id: docRef.id, ...applicationData });
     } catch (error: any) {
         res.status(400).json({ message: error.message });
     }
@@ -27,7 +31,21 @@ export const applyAsVolunteer = async (req: any, res: Response) => {
 
 export const getApplications = async (req: Request, res: Response) => {
     try {
-        const applications = await VolunteerApplication.find().populate('userId', 'name email');
+        const snapshot = await db.collection('volunteers').get();
+        const applicationsPromises = snapshot.docs.map(async doc => {
+            const data = doc.data();
+            let user = null;
+            if (data.userId) {
+                const userDoc = await db.collection('users').doc(data.userId).get();
+                if (userDoc.exists) {
+                    const userData = userDoc.data();
+                    user = { id: userDoc.id, name: userData?.name, email: userData?.email };
+                }
+            }
+            return { id: doc.id, ...data, userId: user };
+        });
+        
+        const applications = await Promise.all(applicationsPromises);
         res.json(applications);
     } catch (error: any) {
         res.status(500).json({ message: error.message });

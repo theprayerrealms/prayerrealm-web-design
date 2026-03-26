@@ -1,32 +1,39 @@
 import { Request, Response } from 'express';
-import { PrayerRequest } from './prayer.model';
+import { db } from '../../config/firebase';
 
 export const createPrayerRequest = async (req: any, res: Response) => {
     try {
-        const prayer = await PrayerRequest.create({
+        const prayerData = {
             ...req.body,
-            userId: req.user?._id
-        });
-        res.status(201).json(prayer);
+            userId: req.user?.id || null, // Firebase uid
+            createdAt: new Date().toISOString(),
+            status: 'PENDING',
+            prayerCount: 0
+        };
+        
+        const docRef = await db.collection('prayers').add(prayerData);
+        res.status(201).json({ id: docRef.id, ...prayerData });
     } catch (error: any) {
         res.status(400).json({ message: error.message });
     }
 };
 
 export const getPublicPrayers = async (req: Request, res: Response) => {
-    const { page = 1, limit = 10, lang = 'en' } = req.query;
+    const { limit = 10, lang = 'en' } = req.query;
     try {
-        const prayers = await PrayerRequest.find({
-            status: 'APPROVED',
-            isPublic: true,
-            language: lang as string
-        })
+        const snapshot = await db.collection('prayers')
+            .where('status', '==', 'APPROVED')
+            .where('isPublic', '==', true)
+            .where('language', '==', lang)
+            .orderBy('createdAt', 'desc')
             .limit(Number(limit))
-            .skip((Number(page) - 1) * Number(limit))
-            .sort({ createdAt: -1 });
+            .get();
+
+        const prayers = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
         res.json(prayers);
     } catch (error: any) {
+        console.error('Firestore Error:', error);
         res.status(500).json({ message: error.message });
     }
 };

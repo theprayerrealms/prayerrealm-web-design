@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import axios from 'axios';
 import crypto from 'crypto';
 import { config } from '../../config/db';
-import { Donation } from './donation.model';
+import { db } from '../../config/firebase'; // Added Firestore db
 import { sendDonationThankYou, sendMonthlyRenewalConfirmation } from '../../utils/email';
 
 // ─── Paystack ─────────────────────────────────────────────
@@ -21,10 +21,6 @@ export const initializePaystack = async (req: Request, res: Response) => {
             }
         };
 
-        // If recurring, Paystack uses "plan" codes for subscriptions.
-        // For now we pass a flag, but in production you'd attach a Paystack Plan ID here.
-        // e.g. paystackPayload.plan = 'PLN_xxxxxxxxxxxxx';
-
         const response = await axios.post('https://api.paystack.co/transaction/initialize', paystackPayload, {
             headers: { Authorization: `Bearer ${config.PAYSTACK.SECRET_KEY}` }
         });
@@ -42,7 +38,6 @@ export const paystackWebhook = async (req: Request, res: Response) => {
     if (hash === req.headers['x-paystack-signature']) {
         const event = req.body;
 
-        // One-time or first-time payment
         if (event.event === 'charge.success') {
             const data = event.data;
             const meta = data.metadata || {};
@@ -50,7 +45,7 @@ export const paystackWebhook = async (req: Request, res: Response) => {
             const donorEmail = data.customer?.email || meta.donor_email || '';
             const donorName = meta.donor_name || data.customer?.first_name || 'Beloved';
 
-            await Donation.create({
+            const donationData = {
                 provider: 'paystack',
                 amount: data.amount / 100,
                 currency: data.currency,
@@ -60,10 +55,12 @@ export const paystackWebhook = async (req: Request, res: Response) => {
                 donorEmail,
                 donorPhone: meta.donor_phone || '',
                 providerReference: data.reference,
-                metadata: data
-            });
+                metadata: data,
+                createdAt: new Date().toISOString()
+            };
 
-            // Send thank-you email
+            await db.collection('donations').add(donationData);
+
             if (donorEmail) {
                 await sendDonationThankYou({
                     to: donorEmail,
@@ -77,14 +74,13 @@ export const paystackWebhook = async (req: Request, res: Response) => {
             }
         }
 
-        // Monthly recurring subscription charge
         if (event.event === 'subscription.charge.success' || event.event === 'invoice.payment_success') {
             const data = event.data;
             const meta = data.metadata || {};
             const donorEmail = data.customer?.email || '';
             const donorName = meta.donor_name || data.customer?.first_name || 'Partner';
 
-            await Donation.create({
+            const donationData = {
                 provider: 'paystack',
                 amount: data.amount / 100,
                 currency: data.currency || 'NGN',
@@ -93,10 +89,12 @@ export const paystackWebhook = async (req: Request, res: Response) => {
                 donorName,
                 donorEmail,
                 providerReference: data.reference || `sub_${Date.now()}`,
-                metadata: data
-            });
+                metadata: data,
+                createdAt: new Date().toISOString()
+            };
 
-            // Send monthly renewal confirmation
+            await db.collection('donations').add(donationData);
+
             if (donorEmail) {
                 await sendMonthlyRenewalConfirmation({
                     to: donorEmail,
@@ -117,8 +115,6 @@ export const paystackWebhook = async (req: Request, res: Response) => {
 
 export const createPayPalOrder = async (req: Request, res: Response) => {
     const { amount, currency, name, email, phone, isRecurring } = req.body;
-    // Full PayPal integration would use PayPal SDK with OAuth token.
-    // This endpoint is a placeholder for the real implementation.
     res.status(200).json({
         message: "PayPal order creation endpoint - implement full OAuth flow here",
         data: { amount, currency, name, email, phone, isRecurring }
@@ -126,10 +122,8 @@ export const createPayPalOrder = async (req: Request, res: Response) => {
 };
 
 export const paypalWebhook = async (req: Request, res: Response) => {
-    // In production, verify PayPal-Transmission-Sig header
     const event = req.body;
 
-    // One-time payment
     if (event.event_type === 'PAYMENT.CAPTURE.COMPLETED') {
         const resource = event.resource;
         const donorEmail = resource.payer?.email_address || '';
@@ -137,7 +131,7 @@ export const paypalWebhook = async (req: Request, res: Response) => {
             ? `${resource.payer.name.given_name} ${resource.payer.name.surname || ''}`
             : 'Beloved';
 
-        await Donation.create({
+        const donationData = {
             provider: 'paypal',
             amount: resource.amount.value,
             currency: resource.amount.currency_code,
@@ -146,8 +140,11 @@ export const paypalWebhook = async (req: Request, res: Response) => {
             donorName,
             donorEmail,
             providerReference: resource.id,
-            metadata: resource
-        });
+            metadata: resource,
+            createdAt: new Date().toISOString()
+        };
+
+        await db.collection('donations').add(donationData);
 
         if (donorEmail) {
             await sendDonationThankYou({
@@ -162,7 +159,6 @@ export const paypalWebhook = async (req: Request, res: Response) => {
         }
     }
 
-    // Monthly recurring subscription payment
     if (event.event_type === 'PAYMENT.SALE.COMPLETED') {
         const resource = event.resource;
         const donorEmail = resource.payer?.email_address || '';
@@ -170,7 +166,7 @@ export const paypalWebhook = async (req: Request, res: Response) => {
             ? `${resource.payer.name.given_name} ${resource.payer.name.surname || ''}`
             : 'Partner';
 
-        await Donation.create({
+        const donationData = {
             provider: 'paypal',
             amount: resource.amount?.total || resource.amount?.value || 0,
             currency: resource.amount?.currency || resource.amount?.currency_code || 'USD',
@@ -179,8 +175,11 @@ export const paypalWebhook = async (req: Request, res: Response) => {
             donorName,
             donorEmail,
             providerReference: resource.id,
-            metadata: resource
-        });
+            metadata: resource,
+            createdAt: new Date().toISOString()
+        };
+
+        await db.collection('donations').add(donationData);
 
         if (donorEmail) {
             await sendMonthlyRenewalConfirmation({

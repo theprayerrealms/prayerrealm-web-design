@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { ContactMessage } from './contact.model';
+import { db } from '../../config/firebase';
 import { sendContactAcknowledgement } from '../../utils/email';
 
 export const submitContactForm = async (req: Request, res: Response) => {
@@ -11,14 +11,17 @@ export const submitContactForm = async (req: Request, res: Response) => {
             return;
         }
 
-        const contact = await ContactMessage.create({
+        const contactData = {
             name,
             email,
             subject: subject || '',
-            message
-        });
+            message,
+            createdAt: new Date().toISOString()
+        };
 
-        // Send acknowledgement email to the person
+        const docRef = await db.collection('contact_messages').add(contactData);
+
+        // Send acknowledgement email
         await sendContactAcknowledgement({
             to: email,
             name,
@@ -27,7 +30,7 @@ export const submitContactForm = async (req: Request, res: Response) => {
 
         res.status(201).json({
             message: 'Your message has been received. We will get back to you soon!',
-            data: contact
+            data: { id: docRef.id, ...contactData }
         });
     } catch (error: any) {
         res.status(500).json({ message: error.message });
@@ -36,7 +39,8 @@ export const submitContactForm = async (req: Request, res: Response) => {
 
 export const getContactMessages = async (req: Request, res: Response) => {
     try {
-        const messages = await ContactMessage.find().sort({ createdAt: -1 });
+        const snapshot = await db.collection('contact_messages').orderBy('createdAt', 'desc').get();
+        const messages = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         res.json(messages);
     } catch (error: any) {
         res.status(500).json({ message: error.message });

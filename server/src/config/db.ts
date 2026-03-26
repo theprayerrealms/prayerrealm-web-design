@@ -1,12 +1,10 @@
-import mongoose from 'mongoose';
 import dotenv from 'dotenv';
-
 dotenv.config();
 
 export const config = {
     NODE_ENV: process.env.NODE_ENV || 'development',
     PORT: process.env.PORT || 5000,
-    MONGODB_URI: process.env.MONGODB_URI || 'mongodb://localhost:27017/prayerrealm',
+    // (Other config remains as is)
     JWT: {
         ACCESS_SECRET: process.env.JWT_ACCESS_SECRET || 'access_secret',
         REFRESH_SECRET: process.env.JWT_REFRESH_SECRET || 'refresh_secret',
@@ -32,14 +30,4 @@ export const config = {
         PASS: process.env.SMTP_PASS || '',
         FROM: process.env.FROM_EMAIL || '',
     },
-};
-
-export const connectDB = async () => {
-    try {
-        await mongoose.connect(config.MONGODB_URI);
-        console.log('MongoDB Connected...');
-    } catch (err) {
-        console.error('Failed to connect to MongoDB', err);
-        process.exit(1);
-    }
 };

@@ -459,3 +459,95 @@ export const sendContactAcknowledgement = async (data: ContactEmailData): Promis
         console.error('[Email] Failed to send contact acknowledgement:', error);
     }
 };
+
+// ─── Event Registration Confirmation ────────────────────────
+
+interface EventEmailData {
+    to: string;
+    name: string;
+    eventTitle: string;
+    ticketId: string;
+}
+
+const buildEventConfirmationEmail = (data: EventEmailData): string => {
+    const firstName = data.name.split(' ')[0] || 'Beloved';
+    return `
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Registration Confirmed</title>
+</head>
+<body style="margin:0;padding:0;font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;background-color:#0a0a0c;">
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:600px;margin:0 auto;">
+        <tr>
+            <td style="padding:40px 30px 20px;text-align:center;background:linear-gradient(135deg,#1a1a2e 0%,#0a0a0c 100%);">
+                <div style="font-size:32px;font-weight:900;letter-spacing:-1px;color:#ffffff;margin-bottom:4px;">
+                    PRAYER<span style="color:#c8a45e;">REALMS</span>
+                </div>
+                <div style="font-size:11px;letter-spacing:3px;color:#c8a45e;text-transform:uppercase;">Registration Engine</div>
+            </td>
+        </tr>
+        <tr><td style="height:3px;background:linear-gradient(90deg,transparent,#c8a45e,transparent);"></td></tr>
+        <tr>
+            <td style="padding:40px 30px;background-color:#111114;">
+                <h1 style="color:#ffffff;font-size:26px;margin:0 0 8px;font-weight:700;">
+                    You're Registered, ${firstName}! 🔥
+                </h1>
+                <p style="color:#a0a0a0;font-size:15px;line-height:1.7;margin:0 0 25px;">
+                    Your registration for <strong style="color:#c8a45e;">${data.eventTitle}</strong> has been successfully received. 
+                    Get ready for an explosive encounter with God!
+                </p>
+
+                <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#1a1a2e;border-radius:12px;border:1px solid rgba(200,164,94,0.2);margin-bottom:25px;">
+                    <tr>
+                        <td style="padding:24px;">
+                            <div style="font-size:11px;letter-spacing:2px;color:#c8a45e;text-transform:uppercase;margin-bottom:16px;font-weight:700;">
+                                Digital Pass Information
+                            </div>
+                            <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
+                                <tr>
+                                    <td style="padding:8px 0;color:#888;font-size:13px;border-bottom:1px solid rgba(255,255,255,0.05);">TICKET ID</td>
+                                    <td style="padding:8px 0;color:#fff;font-size:13px;font-weight:600;text-align:right;border-bottom:1px solid rgba(255,255,255,0.05);">${data.ticketId}</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding:8px 0;color:#888;font-size:13px;border-bottom:1px solid rgba(255,255,255,0.05);">EVENT</td>
+                                    <td style="padding:8px 0;color:#c8a45e;font-size:13px;font-weight:600;text-align:right;border-bottom:1px solid rgba(255,255,255,0.05);">${data.eventTitle}</td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                </table>
+
+                <div style="text-align:center;padding:16px 0;">
+                    <p style="color:#c8a45e;font-style:italic;font-size:14px;line-height:1.7;margin:0 0 8px;">
+                        "Prepare the way of the Lord, make straight in the desert a highway for our God."
+                    </p>
+                    <span style="color:#666;font-size:12px;">— Isaiah 40:3</span>
+                </div>
+            </td>
+        </tr>
+        <tr>
+            <td style="padding:30px;background-color:#080809;text-align:center;border-top:1px solid rgba(255,255,255,0.05);">
+                <p style="color:#444;font-size:10px;margin:0;">© ${new Date().getFullYear()} PrayerRealms. All rights reserved.</p>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>`;
+};
+
+export const sendEventConfirmation = async (data: EventEmailData): Promise<void> => {
+    try {
+        const html = buildEventConfirmationEmail(data);
+        await transporter.sendMail({
+            from: `"PrayerRealms" <${config.SMTP.FROM}>`,
+            to: data.to,
+            subject: `🔥 Registration Confirmed — ${data.eventTitle}`,
+            html,
+        });
+        console.log(`[Email] Event confirmation sent to ${data.to}`);
+    } catch (error) {
+        console.error('[Email] Failed to send event confirmation:', error);
+    }
+};

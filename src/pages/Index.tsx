@@ -3,23 +3,22 @@ import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import SectionWrapper from "@/components/SectionWrapper";
 import AnimatedCounter from "@/components/AnimatedCounter";
-import { impactStats, events, testimonies } from "@/data/siteData";
+import { impactStats, events as initialEvents, testimonies as initialTestimonies } from "@/data/siteData";
 import { Calendar, Heart, Globe, ArrowRight, ChevronLeft, ChevronRight, Instagram, Send } from "lucide-react";
 import { useLiveStatus } from "@/hooks/useLiveStatus";
 
 // Import local hero images
-// Using the existing hero-bg.jpg for the first one.
 import heroBg1 from "@/assets/1.jpg";
-// Note: Please add your 5 custom images into the 'src/assets/hero-images' folder 
-// named 'hero-2.jpg', 'hero-3.jpg', etc., or change these imports to match your filenames!
-import heroBg2 from "@/assets/2.jpg"; // Placeholder, replace with "@/assets/hero-images/hero-2.jpg"
-import heroBg3 from "@/assets/3.jpg"; // Placeholder, replace with "@/assets/hero-images/hero-3.jpg"
-import heroBg4 from "@/assets/4.jpg"; // Placeholder, replace with "@/assets/hero-images/hero-4.jpg"
-import heroBg5 from "@/assets/5.jpg"; // Placeholder, replace with "@/assets/hero-images/hero-5.jpg"
-import heroBg6 from "@/assets/6.jpg"; // Placeholder, replace with "@/assets/hero-images/hero-6.jpg"
-import heroBg7 from "@/assets/7.jpg"; // Placeholder, replace with "@/assets/hero-images/hero-6.jpg"
-import heroBg8 from "@/assets/8.jpg"; // Placeholder, replace with "@/assets/hero-images/hero-6.jpg"
-import heroBg9 from "@/assets/9.jpg"; // Placeholder, replace with "@/assets/hero-images/hero-6.jpg"
+import heroBg2 from "@/assets/2.jpg"; 
+import heroBg3 from "@/assets/3.jpg"; 
+import heroBg4 from "@/assets/4.jpg"; 
+import heroBg5 from "@/assets/5.jpg"; 
+import heroBg6 from "@/assets/6.jpg"; 
+import heroBg7 from "@/assets/7.jpg"; 
+import heroBg8 from "@/assets/8.jpg"; 
+import heroBg9 from "@/assets/9.jpg"; 
+
+
 const heroImages = [
   heroBg1,
   heroBg2,
@@ -34,10 +33,43 @@ const heroImages = [
 
 const Index = () => {
   const isLive = useLiveStatus();
-  const telegramLink = "https://t.me/theprayerrealms"; // Replace with actual link
+  const telegramLink = "https://t.me/theprayerrealms"; 
   const [currentIdx, setCurrentIdx] = useState(0);
+  const [dbEvents, setDbEvents] = useState<any[]>([]);
+  const [dbTestimonies, setDbTestimonies] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    const fetchData = async () => {
+        const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+        try {
+            const [evRes, testRes] = await Promise.all([
+                fetch(`${API_BASE}/api/events`),
+                fetch(`${API_BASE}/api/testimonies`)
+            ]);
+            
+            if (evRes.ok) {
+                const evData = await evRes.json();
+                setDbEvents(evData.length > 0 ? evData.slice(0, 3) : initialEvents.slice(0, 3));
+            } else {
+                setDbEvents(initialEvents.slice(0, 3));
+            }
+
+            if (testRes.ok) {
+                const testData = await testRes.json();
+                setDbTestimonies(testData.length > 0 ? testData.slice(0, 3) : initialTestimonies.slice(0, 3));
+            } else {
+                setDbTestimonies(initialTestimonies.slice(0, 3));
+            }
+        } catch (error) {
+            setDbEvents(initialEvents.slice(0, 3));
+            setDbTestimonies(initialTestimonies.slice(0, 3));
+        } finally {
+            setIsLoading(false);
+        }
+    };
+    fetchData();
+
     const timer = setInterval(() => {
       setCurrentIdx((prev) => (prev + 1) % heroImages.length);
     }, 6000);
@@ -190,7 +222,7 @@ const Index = () => {
         </div>
       </SectionWrapper>
 
-      {/* Upcoming Events Preview */}
+      {/* Upcoming Events Preview - Database Synced */}
       <SectionWrapper>
         <div className="flex items-center justify-between mb-10">
           <h2 className="font-heading text-3xl md:text-4xl font-bold">
@@ -201,7 +233,7 @@ const Index = () => {
           </Link>
         </div>
         <div className="grid md:grid-cols-3 gap-6">
-          {events.slice(0, 3).map((event) => (
+          {dbEvents.map((event) => (
             <motion.div
               key={event.id}
               whileHover={{ y: -4 }}
@@ -217,7 +249,7 @@ const Index = () => {
                   </div>
                 )}
                 <div className="absolute top-3 right-3 bg-red-600 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg">
-                  {event.date.split(',')[0]} {/* Extracts just Month & Day usually */}
+                  {event.date?.split(',')[0]} 
                 </div>
               </div>
 
@@ -243,21 +275,18 @@ const Index = () => {
             </motion.div>
           ))}
         </div>
-        <Link to="/events" className="sm:hidden inline-flex items-center gap-2 gold-text font-medium mt-6 hover:gap-3 transition-all">
-          View all events <ArrowRight size={18} />
-        </Link>
       </SectionWrapper>
 
-      {/* Testimonies Preview */}
+      {/* Testimonies Preview - Database Synced */}
       <SectionWrapper className="bg-secondary">
         <h2 className="font-heading text-3xl md:text-4xl font-bold text-center mb-10">
           What God is <span className="text-black">Doing</span>
         </h2>
         <div className="grid md:grid-cols-3 gap-6">
-          {testimonies.slice(0, 3).map((t) => (
+          {dbTestimonies.map((t) => (
             <motion.div key={t.id} whileHover={{ y: -4 }} className="bg-card rounded-lg p-6 shadow-sm">
               <Heart size={24} className="gold-text mb-4" />
-              <p className="text-muted-foreground text-sm leading-relaxed italic mb-4">"{t.text}"</p>
+              <p className="text-muted-foreground text-sm leading-relaxed italic mb-4">"{t.text || t.content || t.message}"</p>
               <div className="text-sm font-medium">
                 {t.name} <span className="text-muted-foreground">• {t.country}</span>
               </div>
