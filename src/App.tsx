@@ -17,6 +17,7 @@ import Give from "./pages/Give";
 import Contact from "./pages/Contact";
 import PrayerRadio from "./pages/PrayerRadio";
 import NotFound from "./pages/NotFound";
+import Checkin from "./pages/Checkin";
 
 import Admin from "./pages/Admin";
 
@@ -43,6 +44,7 @@ const App = () => (
               <Route path="/contact" element={<Contact />} />
               <Route path="/radio" element={<PrayerRadio />} />
               <Route path="/admin" element={<Admin />} />
+              <Route path="/checkin/:eventId" element={<Checkin />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </Layout>

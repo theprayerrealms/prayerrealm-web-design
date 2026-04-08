@@ -551,3 +551,57 @@ export const sendEventConfirmation = async (data: EventEmailData): Promise<void>
         console.error('[Email] Failed to send event confirmation:', error);
     }
 };
+
+// ─── Broadcast Thank You / Custom Email ────────────────────────
+
+interface BroadcastEmailData {
+    to: string;
+    name: string;
+    eventName: string;
+    messageBody: string;
+}
+
+export const sendThankYouEmail = async (data: BroadcastEmailData): Promise<void> => {
+    try {
+        const firstName = data.name.split(' ')[0] || 'Beloved';
+        
+        // Personalize the message dynamically
+        let personalizedBody = data.messageBody
+            .replace(/{{name}}/g, firstName)
+            .replace(/{{event_name}}/g, data.eventName)
+            .replace(/\\n/g, '<br/>'); // Convert line breaks to HTML
+
+        const html = `
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+</head>
+<body style="margin:0;padding:20px;font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;background-color:#0a0a0c;color:#ffffff;">
+    <div style="max-width:600px;margin:0 auto;background-color:#111114;padding:40px 30px;border-radius:12px;border:1px solid rgba(200,164,94,0.2);">
+        <div style="text-align:center;margin-bottom:30px;">
+            <div style="font-size:24px;font-weight:900;letter-spacing:-1px;color:#ffffff;">
+                PRAYER<span style="color:#c8a45e;">REALM</span>
+            </div>
+        </div>
+        <div style="color:#a0a0a0;font-size:16px;line-height:1.8;">
+            ${personalizedBody}
+        </div>
+        <div style="margin-top:40px;text-align:center;border-top:1px solid rgba(255,255,255,0.05);padding-top:20px;">
+            <p style="color:#555;font-size:12px;">© ${new Date().getFullYear()} Prayer Realm Global Ministry.</p>
+        </div>
+    </div>
+</body>
+</html>`;
+
+        await transporter.sendMail({
+            from: `"Prayer Realm" <${config.SMTP.FROM}>`,
+            to: data.to,
+            subject: `Thank You for Attending ${data.eventName} 🙏`,
+            html,
+        });
+        console.log(`[Email] Broadcast message sent to ${data.to}`);
+    } catch (error) {
+        console.error('[Email] Failed to send broadcast message:', error);
+    }
+};

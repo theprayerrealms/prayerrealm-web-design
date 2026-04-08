@@ -32,7 +32,7 @@ const Admin = () => {
     const [showPassword, setShowPassword] = useState(false);
     const [loginError, setLoginError] = useState('');
 
-    const [activeTab, setActiveTab] = useState<'overview' | 'registrations' | 'events' | 'prayers' | 'testimonies'>('overview');
+    const [activeTab, setActiveTab] = useState<'overview' | 'registrations' | 'attendance' | 'events' | 'prayers' | 'testimonies'>('overview');
     const [isLoading, setIsLoading] = useState(true);
     const [regFilters, setRegFilters] = useState({
         city: '',
@@ -54,8 +54,17 @@ const Admin = () => {
     const [eventsList, setEventsList] = useState<any[]>([]);
     const [prayersList, setPrayersList] = useState<any[]>([]);
     const [testimoniesList, setTestimoniesList] = useState<any[]>([]);
+    const [attendances, setAttendances] = useState<any[]>([]);
 
     const [isCreatingEvent, setIsCreatingEvent] = useState(false);
+    const [attFilters, setAttFilters] = useState({ eventId: '', date: '' });
+    const [schedulingEvent, setSchedulingEvent] = useState<any>(null);
+    const [broadcastData, setBroadcastData] = useState({
+        target: 'checked_in',
+        date: '',
+        time: '',
+        message_template: 'Hello {{name}},\n\nThank you for joining us at {{event_name}}!\n\nWe believe God has begun a work in your life that will produce lasting testimonies.\n\nStay connected with PrayerRealm for upcoming prayer gatherings, revival meetings, and spiritual growth moments.\n\nGrace & Peace,\nPrayerRealm Global'
+    });
     const [editingEventId, setEditingEventId] = useState<string | null>(null);
     const [newEventData, setNewEventData] = useState({
         title: '',
@@ -78,19 +87,29 @@ const Admin = () => {
                 headers: { 'Accept': 'application/json' }
             };
 
-            const [statsRes, regRes, eventsRes, testRes, prayerRes] = await Promise.all([
+            const [statsRes, regRes, eventsRes, testRes, prayerRes, attendanceRes] = await Promise.all([
                 fetch(`${API_BASE}/api/admin/stats`, fetchConfig),
                 fetch(`${API_BASE}/api/admin/registrations`, fetchConfig),
                 fetch(`${API_BASE}/api/events`, fetchConfig),
                 fetch(`${API_BASE}/api/admin/testimonies`, fetchConfig),
-                fetch(`${API_BASE}/api/admin/prayers`, fetchConfig)
+                fetch(`${API_BASE}/api/admin/prayers`, fetchConfig),
+                fetch(`${API_BASE}/api/attendance`, fetchConfig)
             ]);
 
-            setStats(await statsRes.json());
-            setRegistrations(await regRes.json());
-            setEventsList(await eventsRes.json());
-            setTestimoniesList(await testRes.json());
-            setPrayersList(await prayerRes.json());
+            const safeJson = async (res: Response, fallback: any = []) => {
+                if (!res.ok) return fallback;
+                try {
+                    const data = await res.json();
+                    return Array.isArray(fallback) && !Array.isArray(data) ? fallback : data;
+                } catch { return fallback; }
+            };
+
+            setStats(await safeJson(statsRes, { totalRegistrations: 0, activeEvents: 0, totalPrayers: 0, totalTestimonies: 0, pendingPrayers: 0, pendingTestimonies: 0 }));
+            setRegistrations(await safeJson(regRes, []));
+            setEventsList(await safeJson(eventsRes, []));
+            setTestimoniesList(await safeJson(testRes, []));
+            setPrayersList(await safeJson(prayerRes, []));
+            setAttendances(await safeJson(attendanceRes, []));
         } catch (error: any) {
             console.error("Vault Connection Error:", error);
         } finally {
@@ -102,14 +121,14 @@ const Admin = () => {
         fetchData();
     }, []);
 
-    const filteredRegs = registrations.filter(reg => {
+    const filteredRegs = Array.isArray(registrations) ? registrations.filter(reg => {
         return (regFilters.city === '' || reg.city?.toLowerCase().includes(regFilters.city.toLowerCase())) &&
                (regFilters.volunteerStatus === '' || reg.volunteerStatus === regFilters.volunteerStatus) &&
                (regFilters.transportation === '' || reg.transportation === regFilters.transportation) &&
                (regFilters.accommodation === '' || reg.accommodation === regFilters.accommodation) &&
                (regFilters.wrestleVersion === '' || reg.wrestleVersion === regFilters.wrestleVersion) &&
                (regFilters.date === '' || reg.createdAt?.includes(regFilters.date));
-    });
+    }) : [];
 
     const downloadCSV = () => {
         const headers = ["Name", "Email", "Phone", "City", "Volunteer", "Department", "Transport", "Accommodation", "Version", "Status", "Date"];
@@ -131,6 +150,7 @@ const Admin = () => {
     const sidebarItems = [
         { id: 'overview', label: 'Dashboard', icon: LayoutDashboard },
         { id: 'registrations', label: 'Registrations', icon: Users },
+        { id: 'attendance', label: 'Attendance', icon: CheckCircle2 },
         { id: 'events', label: 'Manage Events', icon: Calendar },
         { id: 'prayers', label: 'Prayers', icon: Heart },
         { id: 'testimonies', label: 'Testimonies', icon: MessageSquare },
@@ -191,6 +211,34 @@ const Admin = () => {
                 fetchData();
             } else {
                 toast({ title: "Error", description: "Failed to save event.", variant: "destructive" });
+            }
+        } catch (error) {
+            toast({ title: "Error", description: "Connection error.", variant: "destructive" });
+        }
+    };
+
+    const handleScheduleBroadcast = async (e: React.FormEvent) => {
+        e.preventDefault();
+        const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+        try {
+            const sendAt = new Date(`${broadcastData.date}T${broadcastData.time}`).toISOString();
+            const res = await fetch(`${API_BASE}/api/attendance/broadcast`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    event_id: schedulingEvent.id,
+                    event_name: schedulingEvent.title,
+                    send_at: sendAt,
+                    target: broadcastData.target,
+                    message_template: broadcastData.message_template,
+                    channel: 'email'
+                })
+            });
+            if (res.ok) {
+                toast({ title: "Broadcast Scheduled", description: "Your post-event message has been queued." });
+                setSchedulingEvent(null);
+            } else {
+                toast({ title: "Error", description: "Failed to schedule broadcast.", variant: "destructive" });
             }
         } catch (error) {
             toast({ title: "Error", description: "Connection error.", variant: "destructive" });
@@ -364,10 +412,10 @@ const Admin = () => {
                                             {registrations.slice(0, 5).map(reg => (
                                                 <div key={reg.id} className="flex items-center justify-between p-4 rounded-2xl bg-white/5 border border-white/5">
                                                     <div className="flex items-center gap-4">
-                                                        <div className="w-10 h-10 bg-red-600/10 rounded-full flex items-center justify-center text-red-500 font-bold">{reg.name[0]}</div>
+                                                        <div className="w-10 h-10 bg-red-600/10 rounded-full flex items-center justify-center text-red-500 font-bold">{reg.name?.[0] || '?'}</div>
                                                         <div>
-                                                            <p className="text-white font-bold italic text-sm">{reg.name}</p>
-                                                            <p className="text-[10px] text-muted-foreground uppercase">{reg.email}</p>
+                                                            <p className="text-white font-bold italic text-sm">{reg.name || 'Unknown'}</p>
+                                                            <p className="text-[10px] text-muted-foreground uppercase">{reg.email || 'No email'}</p>
                                                         </div>
                                                     </div>
                                                     <span className="text-[10px] font-black uppercase text-red-500">{reg.date || 'New'}</span>
@@ -393,6 +441,104 @@ const Admin = () => {
                                 </div>
                             </div>
                         )}
+
+                        {activeTab === 'attendance' && (() => {
+                            const filteredAttendances = attendances.filter(att => {
+                                if (attFilters.eventId && (!att.eventId || !att.eventId.toLowerCase().includes(attFilters.eventId.toLowerCase()))) return false;
+                                if (attFilters.date && (!att.timeCheckedIn || !att.timeCheckedIn.includes(attFilters.date))) return false;
+                                return true;
+                            });
+
+                            return (
+                                <div className="space-y-6">
+                                    <div className="glass-card p-6 rounded-[2rem] border-white/5 flex flex-wrap gap-6 shadow-2xl justify-between items-end">
+                                        <div className="flex gap-6 overflow-hidden items-end">
+                                            <div>
+                                                <p className="text-[10px] text-muted-foreground uppercase font-bold">Total Checked In</p>
+                                                <p className="text-2xl font-black text-white">{filteredAttendances.length}</p>
+                                            </div>
+                                            
+                                            <div className="min-w-[150px] space-y-2">
+                                                <label className="text-[10px] font-bold text-white/30 uppercase tracking-widest ml-1">Event ID</label>
+                                                <input 
+                                                    type="text" placeholder="e.g. wrestlelagos" 
+                                                    value={attFilters.eventId}
+                                                    onChange={(e) => setAttFilters({...attFilters, eventId: e.target.value})}
+                                                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-xs text-white focus:outline-none focus:border-red-600"
+                                                />
+                                            </div>
+                                            <div className="w-[140px] space-y-2">
+                                                <label className="text-[10px] font-bold text-white/30 uppercase tracking-widest ml-1">Check-in Date</label>
+                                                <input 
+                                                    type="date"
+                                                    value={attFilters.date}
+                                                    onChange={(e) => setAttFilters({...attFilters, date: e.target.value})}
+                                                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-xs text-white focus:outline-none focus:border-red-600 [color-scheme:dark]"
+                                                />
+                                            </div>
+                                            <button 
+                                                onClick={() => setAttFilters({ eventId: '', date: '' })}
+                                                className="bg-white/5 hover:bg-white/10 text-white/40 hover:text-white px-4 py-3 rounded-xl font-bold text-xs uppercase tracking-widest transition-all mb-[1px]"
+                                            >
+                                                Reset
+                                            </button>
+                                        </div>
+                                        <button 
+                                            onClick={() => {
+                                                const headers = ["Name", "Email", "Phone", "Event ID", "Time Checked In"];
+                                                const rows = filteredAttendances.map(a => [`"${a.name}"`, `"${a.email}"`, `"${a.phone || ''}"`, `"${a.eventId}"`, `"${a.timeCheckedIn}"`]);
+                                                const csvContent = [headers.join(","), ...rows.map(e => e.join(","))].join("\n");
+                                                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                                                const link = document.createElement("a");
+                                                link.href = URL.createObjectURL(blob);
+                                                link.download = `attendance_${new Date().toISOString().split('T')[0]}.csv`;
+                                                link.style.visibility = 'hidden';
+                                                document.body.appendChild(link);
+                                                link.click();
+                                                document.body.removeChild(link);
+                                            }}
+                                            className="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-xl flex items-center gap-2 font-bold text-xs uppercase tracking-widest transition-all mb-[1px]"
+                                        >
+                                            <Download size={14} /> Export CSV
+                                        </button>
+                                    </div>
+                                    <div className="glass-card p-10 rounded-[3rem] border-white/5 min-h-[500px] overflow-x-auto">
+                                        <table className="w-full text-left min-w-[800px]">
+                                            <thead>
+                                                <tr className="border-b border-white/5">
+                                                    <th className="pb-6 text-[10px] font-black uppercase text-white/30">Attendee</th>
+                                                    <th className="pb-6 text-[10px] font-black uppercase text-white/30">Event ID</th>
+                                                    <th className="pb-6 text-[10px] font-black uppercase text-white/30">Time Checked In</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody className="divide-y divide-white/5">
+                                                {filteredAttendances.map((att) => (
+                                                    <tr key={att.id || att.uid} className="group hover:bg-white/[0.02] transition-all">
+                                                        <td className="py-6">
+                                                            <div className="flex items-center gap-4">
+                                                                <div className="w-10 h-10 bg-red-600/10 rounded-full flex items-center justify-center text-red-600 border border-red-600/20 font-black italic">{att.name?.[0] || '?'}</div>
+                                                            <div>
+                                                                <p className="text-white font-bold italic text-sm">{att.name}</p>
+                                                                <p className="text-[10px] text-muted-foreground uppercase">{att.phone || 'N/A'} | {att.email}</p>
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                    <td className="py-6 text-sm text-white/70 italic font-medium">{att.eventId}</td>
+                                                    <td className="py-6 text-sm text-white/70 italic font-medium">{new Date(att.timeCheckedIn).toLocaleString()}</td>
+                                                </tr>
+                                            ))}
+                                            {filteredAttendances.length === 0 && (
+                                                <tr>
+                                                    <td colSpan={3} className="text-center py-20 text-white/20 italic font-black uppercase tracking-widest">
+                                                        No attendees match the criteria.
+                                                    </td>
+                                                </tr>
+                                            )}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        )})()}
 
                         {activeTab === 'registrations' && (
                             <div className="space-y-6">
@@ -495,10 +641,10 @@ const Admin = () => {
                                                 <tr key={reg.id} className="group hover:bg-white/[0.02] transition-all">
                                                     <td className="py-6">
                                                         <div className="flex items-center gap-4">
-                                                            <div className="w-10 h-10 bg-red-600/10 rounded-full flex items-center justify-center text-red-600 border border-red-600/20 font-black italic">{reg.name[0]}</div>
+                                                            <div className="w-10 h-10 bg-red-600/10 rounded-full flex items-center justify-center text-red-600 border border-red-600/20 font-black italic">{reg.name?.[0] || '?'}</div>
                                                             <div>
-                                                                <p className="text-white font-bold italic text-sm">{reg.name}</p>
-                                                                <p className="text-[10px] text-muted-foreground uppercase">{reg.phone} | {reg.email}</p>
+                                                                <p className="text-white font-bold italic text-sm">{reg.name || 'Unknown'}</p>
+                                                                <p className="text-[10px] text-muted-foreground uppercase">{reg.phone || 'N/A'} | {reg.email || 'No email'}</p>
                                                             </div>
                                                         </div>
                                                     </td>
@@ -713,6 +859,7 @@ const Admin = () => {
                                                     <img src={event.image} className="w-full h-full object-cover" />
                                                 </div>
                                                 <h4 className="text-lg font-bold text-white mb-2 italic">{event.title}</h4>
+                                                <p className="text-[10px] text-muted-foreground uppercase mb-1">ID: <span className="text-amber-500 user-select-all cursor-text tracking-widest">{event.id}</span></p>
                                                 <p className="text-[10px] text-muted-foreground uppercase mb-4">{event.date} | {event.location}</p>
                                                 <div className="flex items-center justify-between">
                                                     <span className="text-[10px] font-black text-red-500 uppercase">{event.attendeeCount || 0} RSVPs</span>
@@ -721,8 +868,56 @@ const Admin = () => {
                                                         <button onClick={() => handleEditClick(event)} className="text-xs font-bold text-white/40 hover:text-white uppercase">Modify</button>
                                                     </div>
                                                 </div>
+                                                <button 
+                                                    onClick={() => setSchedulingEvent(event)}
+                                                    className="w-full mt-4 bg-white/5 hover:bg-white/10 text-white py-2 rounded-xl text-xs font-bold uppercase tracking-widest transition-all"
+                                                >
+                                                    Schedule Message
+                                                </button>
                                             </div>
                                         ))}
+                                    </div>
+                                )}
+                                
+                                {schedulingEvent && (
+                                    <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+                                        <div className="glass-card w-full max-w-2xl p-8 rounded-[3rem] border border-white/10 shadow-2xl relative">
+                                            <h3 className="text-2xl font-black text-white italic tracking-tighter uppercase mb-6">
+                                                Schedule <span className="gold-text">Message</span>
+                                            </h3>
+                                            <p className="text-sm text-white/50 mb-6 uppercase tracking-widest font-bold">Event: {schedulingEvent.title}</p>
+                                            
+                                            <form onSubmit={handleScheduleBroadcast} className="space-y-6">
+                                                <div className="grid grid-cols-2 gap-6">
+                                                    <div className="space-y-2 col-span-2 md:col-span-1">
+                                                        <label className="text-[10px] font-bold text-white/30 uppercase tracking-widest ml-1">Send Date</label>
+                                                        <input required type="date" value={broadcastData.date} onChange={e => setBroadcastData({...broadcastData, date: e.target.value})} className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-sm focus:outline-none focus:border-red-600 text-white [color-scheme:dark]" />
+                                                    </div>
+                                                    <div className="space-y-2 col-span-2 md:col-span-1">
+                                                        <label className="text-[10px] font-bold text-white/30 uppercase tracking-widest ml-1">Send Time (Local)</label>
+                                                        <input required type="time" value={broadcastData.time} onChange={e => setBroadcastData({...broadcastData, time: e.target.value})} className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-sm focus:outline-none focus:border-red-600 text-white [color-scheme:dark]" />
+                                                    </div>
+                                                    <div className="space-y-2 col-span-2">
+                                                        <label className="text-[10px] font-bold text-white/30 uppercase tracking-widest ml-1">Target Audience</label>
+                                                        <select value={broadcastData.target} onChange={e => setBroadcastData({...broadcastData, target: e.target.value})} className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-sm focus:outline-none focus:border-red-600 text-white">
+                                                            <option value="checked_in" className="bg-black">Send only to Checked-in Attendees</option>
+                                                            <option value="all" className="bg-black">Send to All Registrants</option>
+                                                        </select>
+                                                    </div>
+                                                    <div className="space-y-2 col-span-2">
+                                                        <label className="text-[10px] font-bold text-white/30 uppercase tracking-widest ml-1 flex justify-between">
+                                                            <span>Message Template</span>
+                                                            <span className="text-red-500">Variables: {'{{name}}, {{event_name}}'}</span>
+                                                        </label>
+                                                        <textarea required rows={6} value={broadcastData.message_template} onChange={e => setBroadcastData({...broadcastData, message_template: e.target.value})} className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-sm focus:outline-none focus:border-red-600 text-white resize-none font-medium leading-relaxed" />
+                                                    </div>
+                                                </div>
+                                                <div className="flex justify-end gap-4 mt-8">
+                                                    <button type="button" onClick={() => setSchedulingEvent(null)} className="px-6 py-3 rounded-xl font-bold text-xs uppercase tracking-widest text-white/40 hover:text-white transition-all">Cancel</button>
+                                                    <button type="submit" className="bg-red-600 hover:bg-red-700 text-white px-8 py-3 rounded-xl font-bold text-xs uppercase tracking-widest transition-all shadow-[0_0_20px_rgba(220,38,38,0.3)]">Schedule Broadcast</button>
+                                                </div>
+                                            </form>
+                                        </div>
                                     </div>
                                 )}
                             </div>
