@@ -6,6 +6,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Heart, Quote, Globe, Calendar as CalendarIcon, Plus } from "lucide-react";
 import { Link } from "react-router-dom";
 import { toast } from "@/components/ui/use-toast";
+import { collection, getDocs, query, orderBy } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
 
 const Testimonies = () => {
   const [dbTestimonies, setDbTestimonies] = useState<any[]>([]);
@@ -14,19 +16,16 @@ const Testimonies = () => {
   useEffect(() => {
     const fetchTestimonies = async () => {
         try {
-            const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-            const res = await fetch(`${API_BASE}/api/testimonies`);
-            if (res.ok) {
-                const data = await res.json();
-                if (data.length > 0) {
-                    setDbTestimonies(data);
-                } else {
-                    setDbTestimonies(initialTestimonies as any[]);
-                }
+            const q = query(collection(db, 'testimonies'), orderBy('createdAt', 'desc'));
+            const snapshot = await getDocs(q);
+            if (!snapshot.empty) {
+                const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() as any })).filter(d => d.status === 'APPROVED');
+                setDbTestimonies(data.length > 0 ? data : initialTestimonies as any[]);
             } else {
                 setDbTestimonies(initialTestimonies as any[]);
             }
         } catch (error) {
+            console.error('Error fetching testimonies:', error);
             setDbTestimonies(initialTestimonies as any[]);
         } finally {
             setIsLoading(false);

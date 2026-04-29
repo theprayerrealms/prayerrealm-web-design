@@ -5,6 +5,8 @@ import { events } from "@/data/siteData";
 import { Calendar, Clock, MapPin, X, Send, CheckCircle2, Users, Map as MapIcon, ChevronRight, Globe, Shield, ArrowLeft } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "@/components/ui/use-toast";
+import { collection, getDocs, addDoc } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
 
 const Events = () => {
   const [viewMode, setViewMode] = useState<'list' | 'detail'>('list');
@@ -29,9 +31,9 @@ const Events = () => {
   useEffect(() => {
     const fetchEvents = async () => {
         try {
-            const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/events`);
-            if (res.ok) {
-                const data = await res.json();
+            const snapshot = await getDocs(collection(db, 'events'));
+            if (!snapshot.empty) {
+                const data = snapshot.docs.map(d => ({ id: d.id, ...d.data() as any })).filter(d => d.status === 'ACTIVE');
                 if (data.length > 0) {
                     setDbEvents(data);
                     setSelectedEvent(data[0]);
@@ -44,6 +46,7 @@ const Events = () => {
                 setSelectedEvent(events[0]);
             }
         } catch (error) {
+            console.error('Error fetching events:', error);
             setDbEvents(events);
             setSelectedEvent(events[0]);
         } finally {
@@ -63,25 +66,21 @@ const Events = () => {
     setIsRegistering(true);
     
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/events/register`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          eventId: selectedEvent.id,
-          ...formData,
-          wrestleVersion: selectedEvent.wrestleVersion || "2.0",
-          customAnswers: formData.customAnswers || {}
-        })
+      await addDoc(collection(db, 'registrations'), {
+        eventId: selectedEvent.id,
+        ...formData,
+        wrestleVersion: selectedEvent.wrestleVersion || "2.0",
+        customAnswers: formData.customAnswers || {},
+        createdAt: new Date().toISOString()
       });
-
-      if (!response.ok) throw new Error("Registration failed");
 
       setFormStep('success');
       toast({
         title: "Registration Successful!",
-        description: "A confirmation email has been sent to your inbox.",
+        description: "Your registration has been securely logged at the Altar.",
       });
     } catch (error) {
+      console.error('Error registering for event:', error);
       toast({
         title: "Error",
         description: "Something went wrong. Please try again later.",

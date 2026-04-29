@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
 import { auth, db } from '@/lib/firebase';
@@ -9,6 +9,7 @@ import { Loader2, CheckCircle } from 'lucide-react';
 import {
     collection,
     doc,
+    getDoc,
     setDoc,
     query,
     where,
@@ -20,8 +21,32 @@ const Checkin = () => {
     const [step, setStep] = useState<'LOGIN' | 'PHONE' | 'SUCCESS'>('LOGIN');
     const [phone, setPhone] = useState('');
     const [loading, setLoading] = useState(false);
+    const [pageLoading, setPageLoading] = useState(true);
     const [userData, setUserData] = useState<any>(null);
     const [alreadyCheckedIn, setAlreadyCheckedIn] = useState(false);
+    const [eventData, setEventData] = useState<any>(null);
+
+    // Fetch Event Details when page loads
+    useEffect(() => {
+        const fetchEvent = async () => {
+            if (!eventId) {
+                setPageLoading(false);
+                return;
+            }
+            try {
+                const eventRef = doc(db, 'events', eventId);
+                const eventSnap = await getDoc(eventRef);
+                if (eventSnap.exists()) {
+                    setEventData(eventSnap.data());
+                }
+            } catch (err) {
+                console.error("Failed to load event:", err);
+            } finally {
+                setPageLoading(false);
+            }
+        };
+        fetchEvent();
+    }, [eventId]);
 
     const performCheckIn = async (uid: string, email: string, name: string, phoneNumber?: string) => {
         setLoading(true);
@@ -59,6 +84,8 @@ const Checkin = () => {
                 name,
                 phone: phoneNumber,
                 eventId: eId,
+                eventName: eventData?.title || 'Unknown Event',
+                wrestleVersion: eventData?.wrestleVersion || 'Unknown',
                 timeCheckedIn: new Date().toISOString(),
             });
 
@@ -96,6 +123,27 @@ const Checkin = () => {
         await performCheckIn(userData.uid, userData.email, userData.name, phone);
     };
 
+    if (pageLoading) {
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-[#070708]">
+                <Loader2 className="w-10 h-10 animate-spin text-red-600" />
+            </div>
+        );
+    }
+
+    if (eventId && !eventData) {
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-[#070708] px-4">
+                <div className="max-w-md w-full bg-white/5 border border-white/10 backdrop-blur-xl p-10 rounded-[3rem] shadow-2xl text-center">
+                    <h2 className="text-2xl font-black text-white italic uppercase mb-2">Event Not Found</h2>
+                    <p className="text-white/40 text-sm font-bold uppercase tracking-widest">
+                        The event ID "{eventId}" does not exist in the database.
+                    </p>
+                </div>
+            </div>
+        );
+    }
+
     return (
         <div className="min-h-screen flex items-center justify-center bg-[#070708] py-12 px-4 relative overflow-hidden">
             {/* Background glows */}
@@ -106,18 +154,18 @@ const Checkin = () => {
                 <div className="text-center">
                     <img src="/LOGO 2.png" alt="PrayerRealm" className="h-16 mx-auto object-contain mb-6" />
                     <h2 className="text-3xl font-black text-white italic tracking-tighter uppercase">
-                        Event <span className="text-red-500">Check-in</span>
+                        {eventData?.title || 'Event'} <span className="text-red-500">Check-in</span>
                     </h2>
-                    <p className="mt-2 text-xs text-white/40 uppercase tracking-widest font-bold">
+                    {eventData?.wrestleVersion && (
+                        <div className="mt-3 mb-2 inline-block bg-amber-500/10 border border-amber-500/20 text-amber-500 px-4 py-1 rounded-full text-[10px] font-black uppercase tracking-widest">
+                            Version {eventData.wrestleVersion}
+                        </div>
+                    )}
+                    <p className="mt-4 text-xs text-white/40 uppercase tracking-widest font-bold">
                         {step === 'LOGIN' && 'Scan & sign in to mark your attendance'}
                         {step === 'PHONE' && 'One last step — add your phone'}
                         {step === 'SUCCESS' && (alreadyCheckedIn ? 'Already checked in' : 'You are checked in!')}
                     </p>
-                    {eventId && (
-                        <p className="mt-2 text-[10px] text-amber-500/60 uppercase tracking-widest font-bold">
-                            Event: {eventId}
-                        </p>
-                    )}
                 </div>
 
                 {step === 'LOGIN' && (

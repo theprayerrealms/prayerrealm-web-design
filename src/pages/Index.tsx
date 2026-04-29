@@ -6,6 +6,8 @@ import AnimatedCounter from "@/components/AnimatedCounter";
 import { impactStats, events as initialEvents, testimonies as initialTestimonies } from "@/data/siteData";
 import { Calendar, Heart, Globe, ArrowRight, ChevronLeft, ChevronRight, Instagram, Send } from "lucide-react";
 import { useLiveStatus } from "@/hooks/useLiveStatus";
+import { collection, getDocs, query, orderBy } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
 
 // Import local hero images
 import heroBg1 from "@/assets/1.jpg";
@@ -41,27 +43,27 @@ const Index = () => {
 
   useEffect(() => {
     const fetchData = async () => {
-        const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000';
         try {
-            const [evRes, testRes] = await Promise.all([
-                fetch(`${API_BASE}/api/events`),
-                fetch(`${API_BASE}/api/testimonies`)
+            const [evSnap, testSnap] = await Promise.all([
+                getDocs(query(collection(db, 'events'))),
+                getDocs(query(collection(db, 'testimonies'), orderBy('createdAt', 'desc')))
             ]);
             
-            if (evRes.ok) {
-                const evData = await evRes.json();
+            if (!evSnap.empty) {
+                const evData = evSnap.docs.map(doc => ({ id: doc.id, ...doc.data() as any })).filter(d => d.status === 'ACTIVE');
                 setDbEvents(evData.length > 0 ? evData.slice(0, 3) : initialEvents.slice(0, 3));
             } else {
                 setDbEvents(initialEvents.slice(0, 3));
             }
 
-            if (testRes.ok) {
-                const testData = await testRes.json();
+            if (!testSnap.empty) {
+                const testData = testSnap.docs.map(doc => ({ id: doc.id, ...doc.data() as any })).filter(d => d.status === 'APPROVED');
                 setDbTestimonies(testData.length > 0 ? testData.slice(0, 3) : initialTestimonies.slice(0, 3));
             } else {
                 setDbTestimonies(initialTestimonies.slice(0, 3));
             }
         } catch (error) {
+            console.error('Error fetching index data:', error);
             setDbEvents(initialEvents.slice(0, 3));
             setDbTestimonies(initialTestimonies.slice(0, 3));
         } finally {

@@ -5,6 +5,8 @@ import { prayerWallPosts as initialPosts, countries, prayerCategories } from "@/
 import { motion, AnimatePresence } from "framer-motion";
 import { Heart, Globe, Send, Shield, AlertCircle, Plus } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
+import { collection, getDocs, addDoc, query, orderBy } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
 
 const PrayerWall = () => {
   const [posts, setPosts] = useState<any[]>([]);
@@ -27,19 +29,16 @@ const PrayerWall = () => {
 
   const fetchPrayers = async () => {
     try {
-        const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-        const res = await fetch(`${API_BASE}/api/prayers`);
-        if (res.ok) {
-            const data = await res.json();
-            if (data.length > 0) {
-                setPosts(data);
-            } else {
-                setPosts(initialPosts);
-            }
+        const q = query(collection(db, 'prayers'), orderBy('createdAt', 'desc'));
+        const snapshot = await getDocs(q);
+        if (!snapshot.empty) {
+            const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() as any })).filter(d => d.status === 'APPROVED');
+            setPosts(data.length > 0 ? data : initialPosts);
         } else {
             setPosts(initialPosts);
         }
     } catch (error) {
+        console.error('Error fetching prayers:', error);
         setPosts(initialPosts);
     } finally {
         setIsSyncing(false);
@@ -73,36 +72,31 @@ const PrayerWall = () => {
     setLoading(true);
 
     try {
-        const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-        const res = await fetch(`${API_BASE}/api/prayers`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                ...formData,
-                isPublic: formData.showOnWall
-            })
+        await addDoc(collection(db, 'prayers'), {
+            ...formData,
+            isPublic: formData.showOnWall,
+            status: 'PENDING',
+            prayerCount: 0,
+            createdAt: new Date().toISOString()
         });
-
-        if (res.ok) {
-            setSubmitted(true);
-            setTimeout(() => {
-                setSubmitted(false);
-                setFormData({
-                  name: "",
-                  email: "",
-                  country: "Nigeria",
-                  category: "Healing",
-                  message: "",
-                  showOnWall: true,
-                  isUrgent: false,
-                  isAnonymous: false,
-                });
-            }, 5000);
-            fetchPrayers(); // Refresh wall
-        } else {
-            setError("Failed to submit request. Please try again.");
-        }
+        
+        setSubmitted(true);
+        setTimeout(() => {
+            setSubmitted(false);
+            setFormData({
+              name: "",
+              email: "",
+              country: "Nigeria",
+              category: "Healing",
+              message: "",
+              showOnWall: true,
+              isUrgent: false,
+              isAnonymous: false,
+            });
+        }, 5000);
+        fetchPrayers(); // Refresh wall
     } catch (error) {
+        console.error('Error submitting prayer:', error);
         setError("Network error. Please check your connection.");
     } finally {
         setLoading(false);
