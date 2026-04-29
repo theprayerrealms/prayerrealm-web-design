@@ -22,5 +22,3 @@ export const storage = getStorage(app);
 export const messaging = typeof window !== 'undefined' ? getMessaging(app) : null;
 
 export default app;
-
-export default app;
