@@ -12,7 +12,7 @@ const quickButtons = [
   "Submit Prayer Request",
   "Get Encouragement Scripture",
   "Join Live Prayer",
-  "Learn About Prayer Realm",
+  "Learn About PrayerRealm",
   "How Can I Volunteer?",
   "I Need Someone to Pray With",
 ];
@@ -308,7 +308,7 @@ const renderMessageWithLinks = (text: string) => {
 
 const WELCOME_MESSAGE: Message = {
   role: "assistant",
-  text: "Welcome to Prayer Realm 🌍 How can we pray with you today? You can tap one of the options below or type your own message!"
+  text: "Welcome to PrayerRealms 🌍 How can we pray with you today? You can tap one of the options below or type your own message!"
 };
 
 const Chatbot = () => {

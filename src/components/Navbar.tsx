@@ -21,19 +21,29 @@ const Navbar = () => {
 
         {/* Desktop Nav */}
         <div className="hidden lg:flex items-center gap-1">
-          {navLinks.map((link) => (
-            <Link
-              key={link.path}
-              to={link.path}
-              className={`px-3 py-2 text-sm font-medium rounded-md transition-colors duration-200 ${
-                location.pathname === link.path
-                  ? "gold-text"
-                  : "text-primary-foreground/70 hover:text-primary-foreground"
-              }`}
-            >
-              {link.label}
-            </Link>
-          ))}
+          {navLinks.map((link) =>
+            link.disabled ? (
+              <span
+                key={link.path}
+                title="Coming Soon"
+                className="px-3 py-2 text-sm font-medium rounded-md text-primary-foreground/30 cursor-not-allowed select-none"
+              >
+                {link.label}
+              </span>
+            ) : (
+              <Link
+                key={link.path}
+                to={link.path}
+                className={`px-3 py-2 text-sm font-medium rounded-md transition-colors duration-200 ${
+                  location.pathname === link.path
+                    ? "gold-text"
+                    : "text-primary-foreground/70 hover:text-primary-foreground"
+                }`}
+              >
+                {link.label}
+              </Link>
+            )
+          )}
         </div>
 
         {/* Mobile Toggle */}
@@ -56,20 +66,30 @@ const Navbar = () => {
             className="lg:hidden gradient-navy border-t border-navy-light/30 overflow-hidden"
           >
             <div className="container-narrow py-4 flex flex-col gap-1">
-              {navLinks.map((link) => (
-                <Link
-                  key={link.path}
-                  to={link.path}
-                  onClick={() => setIsOpen(false)}
-                  className={`px-4 py-3 rounded-md text-sm font-medium transition-colors ${
-                    location.pathname === link.path
-                      ? "gold-text bg-navy-light/50"
-                      : "text-primary-foreground/70 hover:text-primary-foreground hover:bg-navy-light/30"
-                  }`}
-                >
-                  {link.label}
-                </Link>
-              ))}
+              {navLinks.map((link) =>
+                link.disabled ? (
+                  <span
+                    key={link.path}
+                    title="Coming Soon"
+                    className="px-4 py-3 rounded-md text-sm font-medium text-primary-foreground/30 cursor-not-allowed select-none"
+                  >
+                    {link.label}
+                  </span>
+                ) : (
+                  <Link
+                    key={link.path}
+                    to={link.path}
+                    onClick={() => setIsOpen(false)}
+                    className={`px-4 py-3 rounded-md text-sm font-medium transition-colors ${
+                      location.pathname === link.path
+                        ? "gold-text bg-navy-light/50"
+                        : "text-primary-foreground/70 hover:text-primary-foreground hover:bg-navy-light/30"
+                    }`}
+                  >
+                    {link.label}
+                  </Link>
+                )
+              )}
             </div>
           </motion.div>
         )}

@@ -6,7 +6,7 @@ export const navLinks = [
   { label: "Sermons", path: "/sermons" },
   { label: "Testimonies", path: "/testimonies" },
   { label: "Volunteer", path: "/volunteer" },
-  { label: "Give", path: "/give" },
+  { label: "Give", path: "/give", disabled: true },
   { label: "Contact", path: "/contact" },
 ];
 

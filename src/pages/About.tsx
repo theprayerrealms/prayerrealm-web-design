@@ -18,42 +18,46 @@ const About = () => {
       <SectionWrapper className="bg-muted/30">
         <div className="text-center mb-12">
           <h2 className="font-heading text-3xl md:text-4xl font-bold mb-4">
-            Our <span className="red-text">Leadership</span> Team
+            Meet Our <span className="red-text">Founder</span>
           </h2>
           <p className="text-muted-foreground max-w-2xl mx-auto">
-            Meet the dedicated individuals who lead our global mission to connect believers in prayer.
+            A man of prayer raised to ignite altars across nations.
           </p>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-          {[
-            { name: "Prophet Akintunde Hezekiah", role: "Founder", image: "/images/team/founder.png" },
-            { name: "Pastor Craig Femi", role: "Admin (Global)", image: "/images/team/media-director.png" },
-            { name: "Minister B", role: "Global Music Director", image: "/images/team/music-director.png" },
-            { name: "Pastor Sanmi Ayotunde", role: "Media & Tech Director (Global)", image: "/images/team/admin.png" },
-            { name: "Grace Wilson", role: "Prayer Director (Global)", image: "/images/team/tech.png" },
-            { name: "Pastor Emmanuel", role: "Project Director (Global)", image: "/images/team/prayer.png" },
-          ].map((member, index) => (
-            <div
-              key={index}
-              className="group relative overflow-hidden rounded-2xl bg-card shadow-lg transition-all hover:-translate-y-2 hover:shadow-xl"
-            >
-              <div className="aspect-[4/5] overflow-hidden">
-                <img
-                  src={member.image}
-                  alt={member.name}
-                  className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
-                />
-              </div>
-              <div className="p-6 text-center">
-                <h3 className="font-heading text-xl font-bold mb-1">{member.name}</h3>
-                <p className="text-primary font-medium text-sm">{member.role}</p>
-              </div>
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100 flex flex-col justify-end p-6">
-                <p className="text-white text-sm font-medium">{member.role}</p>
-                <p className="text-white/80 text-xs mt-1">Leading with passion and faith.</p>
-              </div>
+
+        {/* Founder Profile */}
+        <div className="flex flex-col lg:flex-row gap-12 items-center lg:items-start max-w-5xl mx-auto">
+          {/* Founder Image */}
+          <div className="w-full lg:w-[360px] flex-shrink-0">
+            <div className="rounded-2xl overflow-hidden shadow-2xl ring-4 ring-primary/20">
+              <img
+                src="/images/team/founder.png"
+                alt="Prophet Akintunde Hezekiah"
+                className="w-full h-auto object-cover"
+              />
             </div>
-          ))}
+            <div className="mt-5 text-center">
+              <h3 className="font-heading text-2xl font-bold">Prophet Akintunde Hezekiah</h3>
+              <p className="text-primary font-semibold text-sm mt-1 gold-text">Founder, PrayerRealms Global</p>
+            </div>
+          </div>
+
+          {/* Bio & Ministry Description */}
+          <div className="flex-1 space-y-6 text-muted-foreground leading-relaxed">
+            <div>
+              <h3 className="font-heading text-2xl font-bold text-foreground mb-3">
+                About the <span className="gold-text">Founder</span>
+              </h3>
+              <p>
+                {/* Replace this with the founder's biography */}
+                The journey of Akintunde Hezekiah is a powerful testament to the transformative power of a life yielded to the Prayer Mantle of Deliverance. From his early life, God began a deep work in him, graciously saving his soul from what he describes as the "torrents of wickedness" and preserving him to fulfill a distinct heavenly mandate. This early encounter with the divine laid the foundation for a man whose heart would eventually beat in sync with God's burden for a generation.
+              </p>
+              <p className="mt-4">
+                {/* Additional personal details */}
+                As he matured in faith, God placed an intense burden for prayer on his heart—a spiritual weight that sought the liberation of destinies held captive. This vision, rooted in effectual fervent prayer, eventually gave birth to PrayerRealms Global. The ministry was birthed not as a mere organization, but as a revival movement designed to bring many to the revelational knowledge of Christ’s authority.Key milestones in his ministry, such as the WRESTLE revival movements across Nigerian campuses and cities like Lagos and Osogbo, reflect his character, a blend of deep humility and fierce dedication to spiritual warfare. Hezekiah remains a vessel through which spontaneous songs in the night and prophetic chants are birthed, always pointing his followers back to the secret place of intimacy with the Father.
+              </p>
+            </div>
+          </div>
         </div>
       </SectionWrapper>
 

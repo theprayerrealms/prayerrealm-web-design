@@ -45,16 +45,26 @@ const Footer = () => {
                 { label: "Volunteer", path: "/volunteer" },
                 { label: "Testimonies", path: "/testimonies" },
                 { label: "Sermons", path: "/sermons" },
-                { label: "Give", path: "/give" },
-              ].map((link) => (
-                <Link
-                  key={link.path}
-                  to={link.path}
-                  className="text-sm text-primary-foreground/60 hover:text-accent transition-colors"
-                >
-                  {link.label}
-                </Link>
-              ))}
+                { label: "Give", path: "/give", disabled: true },
+              ].map((link) =>
+                link.disabled ? (
+                  <span
+                    key={link.path}
+                    title="Coming Soon"
+                    className="text-sm text-primary-foreground/30 cursor-not-allowed select-none"
+                  >
+                    {link.label}
+                  </span>
+                ) : (
+                  <Link
+                    key={link.path}
+                    to={link.path}
+                    className="text-sm text-primary-foreground/60 hover:text-accent transition-colors"
+                  >
+                    {link.label}
+                  </Link>
+                )
+              )}
             </div>
           </div>
 
