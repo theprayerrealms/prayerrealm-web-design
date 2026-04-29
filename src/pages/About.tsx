@@ -61,6 +61,26 @@ const About = () => {
         </div>
       </SectionWrapper>
 
+      <SectionWrapper>
+        <div className="text-center max-w-4xl mx-auto">
+          <h2 className="font-heading text-3xl md:text-4xl font-bold mb-8">
+            Our <span className="gold-text">Mission</span>
+          </h2>
+          <div className="space-y-4 text-muted-foreground text-lg leading-relaxed">
+            <p>
+              Prayerrealms is God's end-time agenda for the rebirth of revival across the nations. 
+              Prayerrealms is a prophetic prayer movement that cuts across denominational walls, doctrinal believes, and barriers.
+            </p>
+            <p>
+              Prayerrealms is a ministry expression where people gather to prayerfully undo every evil work, exercising the authority of Christ over all the powers of the enemy.
+            </p>
+            <p>
+              Prayerrealms is a Christian battle cry, a deliverance prayer altar marked by the HolyGhost fireworks and the emergence of an end-time kingdom army.
+            </p>
+          </div>
+        </div>
+      </SectionWrapper>
+
       <SectionWrapper className="bg-secondary">
         <h2 className="font-heading text-3xl md:text-4xl font-bold text-center mb-10">
           Our <span className="gold-text">Values</span>

@@ -201,10 +201,10 @@ const Index = () => {
             Our <span className="text-black">Mission</span>
           </h2>
           <p className="text-muted-foreground text-lg leading-relaxed">
-            Prayer Realm is an international, non-denominational prayer ministry dedicated to raising up prayer warriors
-            across the globe. We believe that when believers unite in prayer, heaven responds. Our mission is to provide
-            a platform where people from every nation can request prayer, intercede for others, and experience the
-            transformative power of communal prayer.
+            Prayerrealms is God's end-time agenda for the rebirth of revival across the nations. 
+            Prayerrealms is a prophetic prayer movement that cuts across denominational walls, doctrinal believes, and barriers. 
+            Prayerrealms is a ministry expression where people gather to prayerfully undo every evil work, exercising the authority of Christ over all the powers of the enemy. 
+            Prayerrealms is a Christian battle cry, a deliverance prayer altar marked by the HolyGhost fireworks and the emergence of an end-time kingdom army.
           </p>
           <Link to="/about" className="inline-flex items-center gap-2 text-red-600 font-medium mt-6 hover:gap-3 transition-all">
             Learn more about us <ArrowRight size={18} />
