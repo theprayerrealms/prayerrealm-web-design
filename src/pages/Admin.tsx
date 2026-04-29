@@ -25,6 +25,21 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "@/components/ui/use-toast";
+import {
+  collection,
+  getDocs,
+  getDoc,
+  addDoc,
+  setDoc,
+  updateDoc,
+  deleteDoc,
+  doc,
+  query,
+  orderBy,
+  where,
+  serverTimestamp,
+} from "firebase/firestore";
+import { db } from "@/lib/firebase";
 
 const Admin = () => {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -80,38 +95,39 @@ const Admin = () => {
 
     const fetchData = async () => {
         setIsLoading(true);
-        const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-        
         try {
-            const fetchConfig = {
-                headers: { 'Accept': 'application/json' }
+            const snap = async (col: string, ...constraints: any[]) => {
+                const q = constraints.length
+                    ? query(collection(db, col), ...constraints)
+                    : query(collection(db, col));
+                const s = await getDocs(q);
+                return s.docs.map(d => ({ id: d.id, ...d.data() }));
             };
 
-            const [statsRes, regRes, eventsRes, testRes, prayerRes, attendanceRes] = await Promise.all([
-                fetch(`${API_BASE}/api/admin/stats`, fetchConfig),
-                fetch(`${API_BASE}/api/admin/registrations`, fetchConfig),
-                fetch(`${API_BASE}/api/events`, fetchConfig),
-                fetch(`${API_BASE}/api/admin/testimonies`, fetchConfig),
-                fetch(`${API_BASE}/api/admin/prayers`, fetchConfig),
-                fetch(`${API_BASE}/api/attendance`, fetchConfig)
+            const [regs, events, testimonies, prayers, attendance] = await Promise.all([
+                snap('registrations', orderBy('createdAt', 'desc')),
+                snap('events'),
+                snap('testimonies', orderBy('createdAt', 'desc')),
+                snap('prayers', orderBy('createdAt', 'desc')),
+                snap('attendance'),
             ]);
 
-            const safeJson = async (res: Response, fallback: any = []) => {
-                if (!res.ok) return fallback;
-                try {
-                    const data = await res.json();
-                    return Array.isArray(fallback) && !Array.isArray(data) ? fallback : data;
-                } catch { return fallback; }
-            };
-
-            setStats(await safeJson(statsRes, { totalRegistrations: 0, activeEvents: 0, totalPrayers: 0, totalTestimonies: 0, pendingPrayers: 0, pendingTestimonies: 0 }));
-            setRegistrations(await safeJson(regRes, []));
-            setEventsList(await safeJson(eventsRes, []));
-            setTestimoniesList(await safeJson(testRes, []));
-            setPrayersList(await safeJson(prayerRes, []));
-            setAttendances(await safeJson(attendanceRes, []));
+            setRegistrations(regs);
+            setEventsList(events);
+            setTestimoniesList(testimonies);
+            setPrayersList(prayers);
+            setAttendances(attendance);
+            setStats({
+                totalRegistrations: regs.length,
+                totalPrayers: prayers.length,
+                totalTestimonies: testimonies.length,
+                activeEvents: events.length,
+                pendingPrayers: (prayers as any[]).filter(p => p.status === 'PENDING').length,
+                pendingTestimonies: (testimonies as any[]).filter(t => t.status === 'PENDING').length,
+            });
         } catch (error: any) {
-            console.error("Vault Connection Error:", error);
+            console.error('Firestore fetch error:', error);
+            toast({ title: 'Database Error', description: error.message, variant: 'destructive' });
         } finally {
             setIsLoading(false);
         }
@@ -157,91 +173,67 @@ const Admin = () => {
     ];
 
     const updateStatus = async (type: 'prayers' | 'testimonies', id: string, status: string) => {
-        const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000';
         try {
-            const res = await fetch(`${API_BASE}/api/admin/${type}/${id}/status`, {
-                method: 'PATCH',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ status })
+            await updateDoc(doc(db, type, id), {
+                status,
+                updatedAt: new Date().toISOString(),
             });
-            if (res.ok) {
-                toast({ title: "Status Updated", description: `${type} marked as ${status}` });
-                fetchData(); // Refresh
-            }
-        } catch (error) {}
+            toast({ title: 'Status Updated', description: `${type} marked as ${status}` });
+            fetchData();
+        } catch (error: any) {
+            toast({ title: 'Error', description: error.message, variant: 'destructive' });
+        }
     };
 
     const deleteItem = async (type: string, id: string) => {
-        if (!window.confirm("Are you sure you want to remove this item from the sanctuary records?")) return;
-        
-        const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+        if (!window.confirm('Are you sure you want to remove this item from the sanctuary records?')) return;
         try {
-            const res = await fetch(`${API_BASE}/api/admin/${type}/${id}`, {
-                method: 'DELETE'
-            });
-            if (res.ok) {
-                toast({ title: "Item Removed", description: "Successfully deleted from database." });
-                fetchData();
-            }
-        } catch (error) {
-            toast({ title: "Error", description: "Failed to delete item.", variant: "destructive" });
+            await deleteDoc(doc(db, type, id));
+            toast({ title: 'Item Removed', description: 'Successfully deleted from database.' });
+            fetchData();
+        } catch (error: any) {
+            toast({ title: 'Error', description: 'Failed to delete item.', variant: 'destructive' });
         }
     };
 
     const handleCreateEvent = async (e: React.FormEvent) => {
         e.preventDefault();
-        const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000';
         try {
-            const url = editingEventId ? `${API_BASE}/api/events/${editingEventId}` : `${API_BASE}/api/events`;
-            const method = editingEventId ? 'PUT' : 'POST';
-
-            const res = await fetch(url, {
-                method,
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(newEventData)
-            });
-            if (res.ok) {
-                toast({ 
-                    title: editingEventId ? "Event Updated" : "Event Created", 
-                    description: editingEventId ? "The asset modifications have been saved." : "The new asset has been successfully launched." 
-                });
-                setIsCreatingEvent(false);
-                setEditingEventId(null);
-                setNewEventData({ title: '', date: '', time: '', location: '', mapSearchQuery: '', description: '', image: '', wrestleVersion: '2.0', formConfig: { askVolunteer: true, askTransport: true, askAccommodation: true, customQuestions: [] } });
-                fetchData();
+            const payload = { ...newEventData, updatedAt: new Date().toISOString() };
+            if (editingEventId) {
+                await updateDoc(doc(db, 'events', editingEventId), payload);
+                toast({ title: 'Event Updated', description: 'The asset modifications have been saved.' });
             } else {
-                toast({ title: "Error", description: "Failed to save event.", variant: "destructive" });
+                await addDoc(collection(db, 'events'), { ...payload, createdAt: new Date().toISOString(), status: 'ACTIVE' });
+                toast({ title: 'Event Created', description: 'The new asset has been successfully launched.' });
             }
-        } catch (error) {
-            toast({ title: "Error", description: "Connection error.", variant: "destructive" });
+            setIsCreatingEvent(false);
+            setEditingEventId(null);
+            setNewEventData({ title: '', date: '', time: '', location: '', mapSearchQuery: '', description: '', image: '', wrestleVersion: '2.0', formConfig: { askVolunteer: true, askTransport: true, askAccommodation: true, customQuestions: [] } });
+            fetchData();
+        } catch (error: any) {
+            toast({ title: 'Error', description: error.message || 'Failed to save event.', variant: 'destructive' });
         }
     };
 
     const handleScheduleBroadcast = async (e: React.FormEvent) => {
         e.preventDefault();
-        const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000';
         try {
             const sendAt = new Date(`${broadcastData.date}T${broadcastData.time}`).toISOString();
-            const res = await fetch(`${API_BASE}/api/attendance/broadcast`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    event_id: schedulingEvent.id,
-                    event_name: schedulingEvent.title,
-                    send_at: sendAt,
-                    target: broadcastData.target,
-                    message_template: broadcastData.message_template,
-                    channel: 'email'
-                })
+            await addDoc(collection(db, 'broadcasts'), {
+                event_id: schedulingEvent.id,
+                event_name: schedulingEvent.title,
+                send_at: sendAt,
+                target: broadcastData.target,
+                message_template: broadcastData.message_template,
+                channel: 'email',
+                status: 'SCHEDULED',
+                createdAt: new Date().toISOString(),
             });
-            if (res.ok) {
-                toast({ title: "Broadcast Scheduled", description: "Your post-event message has been queued." });
-                setSchedulingEvent(null);
-            } else {
-                toast({ title: "Error", description: "Failed to schedule broadcast.", variant: "destructive" });
-            }
-        } catch (error) {
-            toast({ title: "Error", description: "Connection error.", variant: "destructive" });
+            toast({ title: 'Broadcast Scheduled', description: 'Your post-event message has been queued.' });
+            setSchedulingEvent(null);
+        } catch (error: any) {
+            toast({ title: 'Error', description: error.message || 'Failed to schedule broadcast.', variant: 'destructive' });
         }
     };
 
