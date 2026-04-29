@@ -21,10 +21,10 @@ declare global {
 
 // Real Playlist IDs provided by user
 const PLAYLISTS = {
-    announcement: "PLOJOwGfk3Vb48j9lZ60aBGULy0e4hy3P-",
-    prayer: "PLOJOwGfk3Vb6mpjVqfHBFo_Xnvgcj9rbE",
-    sermon: "PLOJOwGfk3Vb5NL0rtqmt-El9c1tGLXKjs",
-    song: "PLOJOwGfk3Vb5d4R_OKBuAm_X-wZNO2y3I"
+    announcement: "PLkXw_1IQW0UoaZLtvbD153VgGZpvE6-jr",
+    prayer: "PLkXw_1IQW0Uru30C_udJv9sEtLXC33Ydp",
+    sermon: "PLkXw_1IQW0UoLMlCLclWsiAs1tJ2-SDIb",
+    song: "PLkXw_1IQW0UpnzJpW64PNJTAoVSjHFagm"
 };
 
 // The requested rotation pattern: Song -> Announcement -> Sermon -> Announcement -> Prayer -> Announcement
